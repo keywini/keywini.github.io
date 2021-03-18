@@ -1,0 +1,2084 @@
+---
+title: "敏捷開發與測試流程"
+author: "teuton"
+date: "3/17/2021"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+    # fig_width: 7
+    # fig_height: 6
+    fig_caption: true
+    theme: cerulean
+---
+# 敏捷流程概覽
+
+台灣軟體開發目前主要採用兩種流程，首先是瀑布式開發 (Waterfall) ，以**流程**為主軸，只要規則定下去，照著做就會有好產品，其中最具代表的是 CMMI，歷史跟軟體一樣久，幾年前台灣政府大力推動支持
+
+另一種是敏捷式開發 (Agile)，以**人**為主軸，講求的是快速從經驗中學習反應和團隊的自我管理，最知名的樣式是 Scrum，在 1990 年代異軍突起，但在台灣則是這一兩年才開始熱門起來
+
+以一句話總結敏捷開發，就是一種應對快速變化需求的軟體開發能力，請注意**敏捷開發不代表開發流程會變快**，敏捷開發方法是一個**快速迭代的過程**，每次的迭代都能讓團隊針對過去犯下的錯誤反饋進行更正，不像傳統瀑布式開發一個流程完成才接著下一個流程，讓變動性大幅降低
+敏捷測試的關鍵觀念為：客戶價值、適應需求的變化、全民測試、TDD 和 ATDD、自動化測試與其框架、持續測試
+
+## 軟體質量
+
+產品或服務所滿足明示或暗示需求能力的特性和特徵的集合，是定義敏捷開發品質高低的一個標準，分成：
+
+* 產品質量：人實踐產物的屬性和行為，是可以辨識的，並能進行科學的描述
+* 過程質量：探索複雜系統開發過程裡的秩序，按一定規程工作，可以較合理地達到目標
+* 軟體在商業環境中所體現的質量：開發軟體的目的是要投放市場，其質量的表現最終還是要在其生存的商業環境中體現出來，此表現不一定與前兩者同步。就算功能再完善，開發流程照規範，沒有公司願意使用就沒有商業質量
+
+## 敏捷宣言
+
+* 獨立的工作成員與人員互動 勝於 流程與工具的管理
+* **工作產生的軟體 勝於 廣泛而全面的文件**
+* 客戶的合作 勝於 契約的談判
+* 回應變動 勝於 遵循計畫
+
+## 敏捷原則
+
+* 最為優先的事情是**透過早期與持續交付有價值的軟體來使客戶滿意**
+* **歡迎需求的變動**，即使是在開發的晚期。敏捷式流程駕馭變動來作為客戶的競爭優勢
+* 頻繁的交付工作產生的軟體，自數週至數月，週期越短越好
+* 領域專家與開發成員必須一同作業，並貫穿整個專案開發時期
+* 使用積極的工作成員來建構專案，給予他們環境以及支援所需的一切，然後信任他們能夠完成工作
+* 在開發團隊中最快也最有效的傳遞資訊方法就是**面對面的溝通**
+* **工作產生的軟體是衡量進度最主要的依據**
+* 敏捷式流程倡導水平一致的軟體開發
+* 專案發起者，開發人員以及使用者都必須持續的維持專案進度
+* 持續重視技術的優勢以及設計品質
+* 最好的架構、需求以及設計會出現在能夠**自我管理**的團隊裡
+* 在規律的反覆之間，團隊會反省與思考如何更有效率，然後相對的來調整與修正團隊的開發方式
+
+## 敏捷開發角色職位
+
+**所有成員都要抱持敏捷的精神和態度**
+
+* Development team：負責需求的軟體建置開發、部署，另外測試工程師建議拉出，並新增一個測試 Story 的流程，開發人員遵守測試驅動開發原則，其各種分支見\@ref(ATDD)
+* Product Owner：負責決定軟體開發的功能，要站在客戶的立場理解需求，盡所能鉅細靡遺說明、定義使用者故事並排列各待辦事項優先順序，優先順序通常以能達到最大效益為衡量指標，而這最大效益就要靠 PO 去定義，通常是客戶最在意的功能、畫面等等
+* Scrum master：負責提倡以及確保 Scrum 在團隊中順利進行，**時時刻刻提倡敏捷精神**，否則開發團隊會很容易忽略敏捷精神，會造成開發效率不升反降
+* Stakeholder : 利害關係人。統稱 Scrum 成員以外，對於 Scrum 會有一定程度影響的人的統稱，例如：專案主管、客戶窗口、客戶老闆等等
+
+## 敏捷流程(Scrum)
+
+本文件說明採用較常見的 Scrum 開發模式，其流程如圖\@ref(fig:scrum-process2)所示，以下對名詞以及流程進行說明
+
+```{r scrum-process, fig.align='center', fig.cap = "Scrum 開發模式流程圖", echo = FALSE, eval = FALSE}
+DiagrammeR::grViz("
+digraph scrum_process {
+compound=true
+graph [nodesep = 0.1]                  
+
+node [shape = rectangle, color = Coral]
+A [label = 'Project requirements']
+A0 [label = 'Product functions']
+B [label = 'items and tasks']
+C [label = 'Product backlog']
+D [label = 'Sprint planning']
+E [label = 'Sprint backlog']
+F [label = 'Daily scrum']
+G [label = 'Product backlog refinement']
+H [label = 'Burndown chart']
+I [label = 'Potentially shippable product increment']
+J [label = 'Sprint review']
+K [label = 'Sprint Retrospective']
+L [label = 'Scrum board']
+AA [label = 'Product backlog refinement', color = Indigo]
+
+subgraph cluster_0{
+  label = 'Before starting scrum'
+  color = SpringGreen
+  fontcolor = Blue
+  
+  subgraph cluster00 {
+    label = '需求分析'
+    color = ForestGreen
+    
+    A; A0
+  }
+  B
+}
+
+subgraph cluster_1 {
+  label = 'Before starting sprint'
+  color = SpringGreen
+  fontcolor = Blue
+  C; AA
+}
+
+subgraph cluster_2 {
+  label = 'First day of sprint'
+  color = SpringGreen
+  fontcolor = Blue
+  
+  D
+}
+
+subgraph cluster_3 {
+  label = 'Weekdays'
+  color = SpringGreen
+  fontcolor = Blue
+  
+  subgraph cluster_3_1 {
+    label = 'Sprint'
+    color = ForestGreen
+    
+    E; F; G; H; L
+  }
+  I
+}
+
+subgraph cluster_4 {
+  label = 'Last day of the sprint'
+  color = SpringGreen
+  fontcolor = Blue
+  
+  J; K
+}
+
+  A0 -> B [ltail = cluster00]
+  B -> C [lhead = cluster_1, ltail = cluster_0]
+  C -> C [label = 'Renew']
+  {rank = same; C -> AA [label = 'First meeting', style = dotted]}
+  C -> D [lhead = cluster_2, ltail = cluster_1]
+  AA -> D [lhead = cluster_2, ltail = cluster_1, style = dotted]
+  E -> F -> G -> H -> E 
+  G -> I [ltail = cluster_3_1]
+  D -> E [lhead = cluster_3, ltail = cluster_2]
+  I -> J [lhead = cluster_3, ltail = cluster_4]
+  J -> K 
+  {rank = same; A -> B -> C}
+  {rank = same;      D -> E}
+}")
+```
+
+```{r scrum-process2, fig.align='center', fig.cap = "Scrum 開發模式流程圖", echo=FALSE}
+knitr::include_graphics("../../桂冠/images/scrum_process.png")
+```
+
+* 需求分析：由產品人員制定，細化每一個功能的細節，每一個按鈕的位置以及邊界範圍，對於稍大或複雜一點的需求都進行建模，分析分為以下等級：
+  - 高階細節(product)
+    * 主題 theme
+      + 視界 vision
+      + 範圍 scope
+      + 結構 roadmap
+  - 中階(release)
+    * **使用案例 Use case**
+      + 商業價值 Business value
+      + 優先序 Priorty
+    * **class diagram**
+    * **product diagram**
+  - 低階細節(Sprint)
+    * 特色
+      + 使用案例的邏輯分群
+      + 函式
+    * 使用者故事
+      + 身為[使用者]，為了[理由]我想[達成目標]
+      + 驗收測試
+      + Task
+* Item：是 PO 定義的產品產出，**明確的羅列出待開發的項目**，包含使用者故事、測試案例--包含前置條件、操作步驟、預期產出等等，一般而言在 Sprint 期間可以讓 Dev team 完成 3-7 個、長度 1-3 天
+* Task：羅列出開發人員**該做甚麼事情以符合 Item 的需求**，通常以 2–5 小時可完成的範疇為主，並且進行可視化管理
+  -大部分都是準備一面牆(Sprint bocklog)，使用便條紙寫上 task，在切割出 To do、Doing、Done 三個部分的牆壁上貼上當前 task 的進度，於 Sprint 期間移動 task 到對應的狀況
+  -為了配合測試可增加 Test backlog、Test in progress、Test done (這部分等同於 Potentially Shippable Product Increment)
+* Product Backlog(產品待辦清單)：由 PO 負責整理的**產品願景圖**，以 Item 為單位，施工順序由上而下
+* Product Backlog Refinement / PBR(產品待辦清單精煉會議)：PO 和 Dev team 從商業和使用者角度**討論近期施工的 item **，盡可能不觸及技術細節，這個活動非常重要，尤其在一開始的時候
+  - 軟體開發前(一次)：講解所有未來可能發生的功能還有使用者故事，讓開發團隊可以先**規劃初步架構**，才不至於在未來開發規劃遇到困難，長度通常是 10% 的 Sprint 時間
+  - Sprint 期間(每週)：每週固定一次與開發團隊講解接下來可能做的 Item，讓他們提前知道彼此相依關係，尤其**一定要講解更動後的 Item**，長度通常是 10% 的 Sprint 時間
+* Sprint planning(衝刺規劃會議)：每次 Sprint 之前的會議，Dev team 與 PO 決定 Sprint 要開發哪些 Item，Item 優先順序由 PO 分析和評估 Product backlog 來決定，Dev Team **自行拆解 item 成 Task **，選擇一些加入 Sprint backlog 作為本次 Sprint 應完成的目標，通常每星期花費一小時講解 item，每星期花費一小時分配 item
+* Sprint(衝刺)：決定 item 後，按照分配的 Task 開始進行開發，Sprint 長度定義上是 1–4 個禮拜，但實務上不要多過 2 個禮拜且要**保持穩定盡可能不變**，這樣才容易讓團隊掌握節奏，也容易預估和比較 Sprint 內的工作量。大原則是 Sprint 內的 Sprint Backlog 不改變，一切都等 Sprint 結束後再進行下一次的調整，否則會讓開發團隊要再重新與 PO 溝通，減少開發時間
+* Sprint backlog(衝刺待辦清單)：Dev team 向 PO 承諾這個 sprint 會盡力完成的 item list，以 Task 為單位，確認清單期間工程師開始**移動 Task 到對應的狀態**
+* Daily Scrum(每日站立會議)：每天 10–15 分鐘不能超時，每個人輪流講述三個事項:昨天做了什麼、今天準備做什麼、**有遇到什麼困難**，讓團隊資訊同步
+* Burndown chart(燃盡圖)：紀錄 Tasks 剩下的數量，讓團隊知道**目前的開發進度**，樣式如圖\@ref(fig:burndown-chart)所示
+
+```{r burndown-chart, fig.align='center', fig.cap = "burndown chart 範例", echo=FALSE}
+knitr::include_graphics("../../桂冠/images/Burn_down_chart.png")
+```
+
+* Potentially Shippable Product Increment(潛在可交付產品增量)：經過測試之後可上線的 Item 
+* Sprint Review(衝刺檢視會議)：由 PO 根據可上線的功能進行測試互動，並與開發團隊互相溝通理解開發狀況與功能細節，通常 Sprint 1 週對應 1 小時
+* Sprint Retrospective / Sprint Retro(衝刺回顧會議)：Scrum Team 成員(Dev Team 或包含 PO)針對這個 Sprint 團隊的工作模式討論改善，並定出下個 Sprint 改善事項，通常 Sprint 1 週對應 1 小時
+
+## 測試驅動開發與分支 {#ATDD}
+
+關於驅動開發，有些容易搞混的名詞：
+
+* SBE:Specification By Example
+* DDD:Domain Driven Design
+* TDD:Test Driven Development
+* BDD:Behavior Driven Development
+* ATDD:Acceptance Test Driven Development
+
+SBE 顧名思義，用實例來解釋需求，**降低文字模糊性帶來的解讀誤差**。最後會產出活文件。其中較為普遍的格式為 gherkin 語法，也就是「假如(前提)，當(使用者做了什麼事)，那麼(應該要得到什麼結果)」
+
+DDD 是軟體開發藉由連接不斷進化的模組介面來應對複雜需求的方法，**有系統地解構複雜的問題**，很大的的一個部份是在討論商業，系統，使用者流程的分析
+
+TDD 先寫測試再開發。除了能確保測試程式的撰寫，也有助於**在開發初期釐清程式介面如何設計**，整個開發流程會在單元測試、撰寫程式、重構三者間不斷循環。也就是說，先寫一個好的測試，再設法寫出能完成此條件的程式，最後調整此程式碼的結構使其更好理解、效率更好，「先把事情做對，再把事情做好」
+
+BDD 重要精神在於能更有效地發現問題、方便協作和示範。先寫規格：採用 SBE 的作法，用人類語言來描述軟體功能和測試案例，而且可以被執行，這樣**即使非技術人員也能理解**---尤其是業務、開發人員可以將每個功能以 TDD 開發方式實作、且測試人員可以理解程式應該滿足的條件。主要工具為 Cucumber，其實作方法將於\@ref(cucumber)章介紹
+
+ATDD 由驗收測試來驅動開發，其流程如圖\@ref(fig:ATDD)所示
+
+測試與開發在敏捷測試中是同步進行，不像瀑布式開發流程為分開進行，敏捷開發多加利用面對面的溝通可省去繁複的文件與時間
+
+```{r ATDD, fig.align='center', fig.cap = "ATDD 測試模式流程圖", echo=FALSE}
+knitr::include_graphics("../../桂冠/images/ATDD.png")
+```
+
+把 SBE 看成是一種 Interface (介面)，TDD 看成一種 Class (類別)，BDD 和 ATDD 是繼承了 TDD，同時又是兩種 SBE 的實作。此外，BDD 使用了 DDD 的若干觀念，所以 BDD 和 DDD 是 association 的關係
+
+# 測試計畫與測試案例
+
+## 軟體測試基本概念
+
+人非聖賢，**開發過程中出現軟體錯誤是不可避免的**。軟體測試就是為了發現軟體產品所存在的任何意義上的 bug，從而修正這些 bug，使軟體系統更好地滿足用戶的需求，一個好的測試能夠在第一時間發現程式中存在的錯誤，**bug 拖得越晚回報，修復的成本就越高**；一個好的測試是發現了至今尚未發現的錯誤的測試，這可以避免未來產品上市後潛在的可能損失
+
+## 軟體測試原則
+
+可以歸類為十大項原則，測試計畫與測試案例必須遵守
+
+* 所有測試的標準都是建立在**用戶需求**之上
+* 基於「質量第一」的思想去開展各項工作，如果時間與質量衝突，則時間服從質量。與其快速交出可以接受的產品，不如交出一個不容易出錯、滿足需求的產品
+* 事先定義好產品的質量標準，才能根據測試的結果，對產品的質量進行分析與評估；測試案例應指定輸入值並加上預期輸出結果，否則無法進行檢驗
+* **軟體項目一啟動，軟體測試就開始**，而不是等程式寫完才開始；產品完成以前，測試人員要參與需求分析、系統或程式設計的審查工作，並準備測試計畫(需求模型一完成就開始)、測試案例(詳細內容可以在設計模型被確定後補上)、測試腳本和測試環境
+* 窮舉測試是不可能的，但**充分覆蓋程式邏輯**，並確保程式設計中使用的所有條件是有可能的
+* **為達到最佳效果，應由第三方進行測試，而非由開發者進行測試**
+* 進行實際測試之前，應制定良好可行的測試計畫，特別是測試策略和測試目標
+* 根據測試目的，採用相應的方法去設計測試案例，檢查程式該做與**不該做**的事，合理輸入和非法輸入也要設計測試案例進行測試
+* 對發現較多錯誤的程式段，應進行更深入的測試
+* 測試計畫、測試案例、測試報告都是檢查整個開發過程的主要依據，要妥善保存
+
+## 軟體測試注意事項和經驗分享
+
+以下是專業測試團隊整理出的一些心得與經驗
+
+* 測試人員的座右銘是**儘早和不斷的測試**，可以省時間，提早發現 bug 減少修復成本，甚至發現尚未被發現的 bug 提升軟體質量
+* 注意回歸測試的關連性，也就是程式更新後測試先前的功能還能正常運作，**修一個錯多三個錯不少見**
+* 測試從小規模到大規模，循序漸進
+* 嚴格遵照測試案例，特別是當 bug 被修改了以後，容易忽視先前沒發生的 bug
+* 徹底檢查每個測試結果，許多最終發現的錯誤是早期測試遺漏的
+* 注意測試中的錯誤集中發生現象，這和開發者有很大關係
+* 對測試錯誤結果一定要有一個確切的流程，嚴重的錯誤可以開會進行討論和分析
+
+## 軟體測試方法
+
+測試方法依據測試原則進行，可根據對測試對象瞭解的程度，分為黑盒測試和白盒測試
+
+* 黑盒測試：在測試者不知程序或內部結構的情況下，從用戶出發，根據產品應該實現的實際功能和已經定義好的產品規格，驗證產品應有的功能是否實現與滿足客戶要求
+* 白盒測試：已知產品內部工作流程，檢驗程式中的每條通路是否都能按照預定要求正確工作，是「基於覆蓋的測試」，應朝著提高覆蓋率的方向努力
+
+## 軟體測試類型
+
+根據特定用戶需求關注點，測試目標或測試原因，可以採用針對被測對象特定質量特性的測試活動，以下為一些分類
+
+* 功能測試：對產品的各功能進行驗證，根據功能測試案例，逐項測試，檢查產品是否達到用戶要求的功能
+* 性能測試：通過自動化的測試工具模擬多種正常、峰值以及異常負載條件來對系統的各項性能指標進行測試，其中包含：
+  - 負載測試：不限制軟體的運行資源，測試軟體的數據吞吐量上限，以發現設計上的錯誤或驗證系統的負載能力
+  - 壓力測試：確定一個系統的瓶頸或者不能接受的性能點，來獲得系統能提供的最大服務級別的測試，通常要進行軟體壓力測試的資源包括內部內存、CPU 可用性、磁碟空間和網絡帶寬
+  - 容量測試：測試預先分析出反映軟體系統應用特徵的某項指標的極限值，如最大並發用戶數、資料庫記錄數等
+* 安全測試：在 IT 軟體產品的生命周期中，特別是產品開發基本完成到發布階段，對產品進行檢驗以驗證產品符合安全需求定義和產品質量標準的過程
+* 單元測試：確保軟體的每個單元或是組件按照預期執行
+* 整合測試：確保在整合單元軟體模組時，之間**交互**中不會出現任何缺陷
+* 系統測試：驗證完整且完全整合的軟體產品，評估端到端的系統規格，測試環境應與實際環境相似，並參考系統的需求、規格與效能要求來進行設計
+* 驗收測試：為了將應用程式釋出之前進行系統的 驗證/驗收，在完成單元、整合和系統測試之後，在測試的**最後階段完成驗收測試**
+
+## Unit Test Assertion
+
+單元測試的驗證有幾種形式：
+
+* 當測試的目標回傳值，其必須符合預期型態和值
+* 當測試的目標狀態改變，測試程式要驗證其狀態符合預期改變
+* 當測試的目標向第三方取得回傳值或狀態，其必須符合預期型態和值，此第三方稱為 stub
+* 當測試的目標會改變第三方的狀態，其必須符合預期改變形式，此第三方稱為mock
+* 針對一般直接相依的物件，有時候可以「刻意」建立物件來驗證測試目標對此物件的反應，例如針對一個不常出錯的測試目標，建立一個會發生錯誤的物件來驗證測試目標應對錯誤的反應，或是針對一個驗證星期五的測試目標，建立一個星期五物件來驗證測試程式在星期五應該出現的反應，這個刻意建造的物件稱為 fake
+
+## 測試計畫的內涵
+
+以瀑布是開發而言，為了更好的組織與實施測試工作，測試負責人需要制定測試計畫。內容包含測試流程、測試環境、測試方法、測試項目/範圍、時程安排、限制條件等，撰寫測試計畫有一些優點
+
+* 會有測試流程的手順，描寫該如何執行測試
+* 會描述測試範圍的細節，避免做過多不必要的功能
+* 可以更精確的評估系統所需的測試時間與成本
+* 可以更清楚的定義出測試團隊裡每個人的角色與責任
+* 提供出每個測試活動的時程安排
+* 描述出測試流程中所需的資源和設備
+* 可以提供予客戶，包含提高信任度，也可同時確認需求的準確度
+
+以敏捷開發流程而言，測試和開發是一起進行的，測試人員和開發團隊藉由面對面溝通可以決定測試計畫的幾乎所有內容，因此測試計畫文件內容也因此大大減少，進而減少撰寫文件的時間以增加效率，測試計畫不超過一頁，或是**附加在 item 裡，甚至可直接不寫**
+
+## 測試計畫撰寫方法
+
+以瀑布式開發而言，撰寫測試計畫需要把握以下幾點
+
+* 分析產品：先了解產品的需求、目標、使用者...等相關的資訊，其實就類似專案開發中的系統需求分析，透過與客戶訪談、討論，來設計功能，並反覆確認需求的內容，以確保滿足度，這個也同時可以讓測試的目標更加精確
+* 設計測試策略：這是流程中最重要的部分，要定義出：專案的測試目標與達成方法、決定測試的成本，會有四個步驟
+  - 定義測試範圍：哪些是需要被測試的、哪些是不需要被測試的
+  - 識別測試類型：該測試屬於單元測試、整合測試、系統測試....還是什麼層級
+  - 文件化風險與問題：將未來可能遇到的風險或問題先列出來並準備其對應方式，以文件化方式記錄
+  - 建立測試邏輯：主要是誰要測試、什麼時機測試、測試什麼
+* 定義測試目標：可條列出需要測試的內容，例如：效能、功能正確性、畫面、系統可用性...等等，然後將此些內容的測試目標定義出來
+* 定義測試規範：測試規範是用來斷定是否通過測試以及整體測試流程的準則，當測試沒有通過時，要一直等待至開發有針對 bug 的修正，再行再次的測試，直至通過為止
+* 資源計畫：執行測試時所需要的資源：包含人力、設備...等等
+* 決定測試環境：決定測試的環境設定
+* 時程與估計：要計劃出什麼時間做什麼測試，以及開發此類型測試所需的人天、準備相關環境與設定的成本
+* 決定測試交付：測試前、測試中、測試完成後，分別需要產出或是交付什麼樣的東西
+
+## 測試案例設計方法
+
+為了更好更有效的進行測試，保證測試工作質量，在執行測試工作之前要先設計測試案例，這是**保證測試質量的核心工作**，很多測試技術都可以用來指導測試案例。一份測試案例由一些測試項組成，每個測試項包含一些用例名稱、測試類型、測試條件(測試手段)、期望結果、優先序、單元測試結果、整合測試結果、jira report ID 等
+
+在敏捷開發流程中，測試案例是 item 的一部份，或是直接在單元測試程式碼註解標記，**可以不用產生一份測試案例文件**
+
+以下提供一些基本驗證測試類型與其內的測試方法，這些不是全部，希望讀者發揮想像力想出更多，測試案例除了要驗證客戶需求的功能正常運作外，也要確認**不合理的輸入或操作順序會導致預期的錯誤訊息**
+
+* 數據類型：日文韓文泰文等亞洲或特殊字元、2 月 30 日不應該存在、郵件輸入應該包含\@字元、整數輸入格不應該接受小數、除以零的應對方法...
+* 啟發式：輸入錯誤或操作錯誤預期的觸發異常反應、不能超過 3 的輸入格輸入 3 或 4、只有唯一值(例如 ID)的重複輸入處理方法、資料排序要正確...
+* Web tests：*html/JavaScript 命令*在輸入格的反應、超連結沒有損毀且沒有超連結無法到達的相關網頁、表單輸入修改與儲存、查詢指定資料、圖片正確顯示、不合理操作導致的警告視窗訊息...
+* 資料登錄：數字輸入文字、正數輸入負值、儲存空白資料...
+
+基本驗證測試案例優先自動化，而對一些複雜的功能測試案例，可以先手工測試，直到在未來 Sprint 週期中該功能達到穩定時候再考慮自動化
+
+# 建立和配置標準規範的測試環境與自動化
+
+配置測試環境是測試實施的一個重要階段．使用符合軟體最低需求、且在普及的作業系統，不同環境設置有時會使相同操作得出不同結果，使用 docker 可以藉由 pull 相同的 image 統一 container 環境，避免上述問題發生
+
+自動化測試程式為敏捷測試的一個重要部分，**以快速且精準的測試應對快速迭代的開發流程**，以下範例為網頁程式自動化測試環境建置與方法，環境建置相對容易
+
+## Ubuntu 18.04 介面中文化
+
+在 ubuntu 安裝好 xrdp 桌面後，先在終端機依序輸入以下指令安裝中文字型相關套件
+
+```{r eval = FALSE}
+sudo apt-get install language-pack-zh-han*
+sudo apt install $(check-language-support)
+sudo apt-get install font-manager
+```
+
+接著修改兩個設定檔，將預設更改為中文環境，首先用 vi 或是 nano 編輯 /etc/default/locale 檔案
+
+```{r eval = FALSE}
+sudo nano /etc/default/locale
+```
+
+將內容改成
+
+```{r eval = FALSE}
+LANG="zh_TW.UTF-8"
+LANGUAGE="zh_TW:zh:en_US:en"
+```
+
+然後修改 /etc/environment
+
+```{r eval = FALSE}
+sudo nano /etc/environment
+```
+
+在下方加上
+
+```{r eval = FALSE}
+LANG="zh_TW.UTF-8"
+LANGUAGE="zh_TW:zh"
+LC_NUMERIC="zh_TW"
+LC_TIME="zh_TW"
+LC_MONETARY="zh_TW"
+LC_PAPER="zh_TW"
+LC_NAME="zh_TW"
+LC_ADDRESS="zh_TW"
+LC_TELEPHONE="zh_TW"
+LC_MEASUREMENT="zh_TW"
+LC_IDENTIFICATION="zh_TW"
+LC_ALL="zh_TW.UTF-8"
+```
+
+接著設定語言，輸入此指令
+
+```{r eval=FALSE}
+sudo dpkg-reconfigure locales
+```
+
+選擇 zh_TW.UTF-8  
+清理暫存空間
+
+```{r eval=FALSE}
+sudo fc-cache -fv
+```
+
+最後重新開機使設定生效
+
+```{r eval=FALSE}
+sudo reboot
+```
+
+## 安裝 R 語言以及相關套件(選擇性)
+
+如果打算使用 R 作為自動化測試程式寫作語言，就要安裝 R  
+如果打算使用 java 作為自動化測試程式寫作語言，跳過此小節
+
+到 CRAN 官網上下載 R 語言，依照指示安裝，並且**記錄安裝路徑**
+
+完成安裝後，進入 R 的主畫面，在主視窗輸入以下指令來安裝套件，一次一個
+
+```{r eval = FALSE}
+install.packages("RSelenium")
+install.packages("testthat")
+install.packages("odbc") # 選擇性
+install.packages("DBI") # 選擇性
+install.packages("readxl") # 選擇性
+```
+
+其中 Rselenium 套件可以模擬使用者操作瀏覽器，testthat 套件可以用來寫單元測試程式，odbc 和 DBI 作為 MSSQL 連線工具，readxl 用來讀取 excel 檔案
+
+## 安裝 java
+
+使用 java 可以作為撰寫自動化測試程式的主要語言，或是啟動 selenium 伺服器以協助 R 測試程式開發
+
+前往 java 官網[下載最新版的 java](https://www.java.com/zh_TW/)
+
+## 選用 MSSQL 資料庫連線程式 (選擇性)
+
+如果你的測試程式不需要從 MSSQL 獲得資料，跳過此小節
+
+資料庫連嫌程式可以使 R 程式碼進行資料庫操作，如果你的電腦作業系統是 Windows，照理說 SQL Server 已經安裝完畢，你可以在搜尋欄位啟用 ODBC Data Source Administrator 並切換至 Drivers 標籤來查看，如圖\@ref(fig:check-MSDB-Driver)所示
+
+```{r check-MSDB-Driver, fig.width=3, fig.cap="確認微軟資料庫驅動程式", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/check_MSDB_Driver.png")
+```
+
+如果你是 Mac OS 或是 Linux 系統，你可以安裝 [Microsoft ODBC Driver For SQL Server](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-driver-manager?view=sql-server-ver15)
+
+## 安裝 docker
+
+使用 docker 統一自動化測試環境以及執行程式版本
+
+[點擊這裡安裝 docker](https://docs.docker.com/get-docker/)
+
+## 下載和啟動 Selenium 伺服器 {#selenium}
+
+如果是為了進行自動化測試程式寫作，你還需要下載 webdirver；如果已經完成自動化測試程式，準備在 docker-jenkins 上部署，這些則由 docker-selenium 包辦
+
+### 作為自動化程式寫作協助工具
+
+如果使用 R，根據你用於測試的網頁瀏覽器，下載 [Chrome webdriver](http://chromedriver.chromium.org/) 或是 [FireFox webdriver](https://github.com/mozilla/geckodriver)，記得下載支援最新版 chrome 或是 firefox 的 webdriver 以更貼近使用者體驗(使用者通常會將瀏覽器自動更新至最新版)，並且下載 [selenium server (Grid)](https://www.selenium.dev/downloads/)
+
+將下載好的 webdriver 和 selenium-server-standalone.jar 放在習慣的地方並**記錄其路徑**，接著到 shell 執行這個指令來啟動 selenium 伺服器：
+
+```{r eval=FALSE}
+# chrome 使用者
+java -Dwebdriver.chrome.driver=<你的webdriver路徑> -jar <你的selenium-server-standalone.jar檔路徑>
+
+# firefox 使用者
+java -Dwebdriver.gecko.driver=<你的webdriver路徑> -jar <你的selenium-server-standalone.jar檔路徑>
+```
+
+被<>夾住的地方就是要修改的部分，連接阜預設為 4444，但你可以新增 "-port 8000" 選項將連接阜改為 8000，或是其他數字
+
+如果使用 java，請見\@ref(javaSelenium)節詳細說明
+
+### 作為與 docker 應用程式整合使用
+
+在 shell 依序輸入下面指令來新增一個運行中的 docker-selenium container，確定 container 可以啟動後，先將其關閉以避免消耗額外資源：
+
+```{r eval = FALSE}
+# 下載 docker-selenium 的 chrome image
+docker pull selenium/standalone-chrome:latest
+
+# 新增 container 來執行 docker-selenium
+docker run -d -p <自動化程式連線使用的連接阜>:4444 -e NODE_MAX_INSTANCES=5 -e NODE_MAX_SESSION=5 --name selenium-server -v /dev/shm:/dev/shm selenium/standalone-chrome:latest
+
+docker run -d -p 4444:4444 -e NODE_MAX_INSTANCES=5 -e NODE_MAX_SESSION=5 --name selenium-server -v /dev/shm:/dev/shm selenium/standalone-chrome:latest
+
+
+# 查看 container 運行狀態，並確認ID
+docker ps -a
+
+# 停止指定 container
+docker stop selenium-server
+```
+
+使用 latest 版本理由同上：更貼近使用者體驗，你可以更改連接阜來應對 R 程式的連接阜或是決定 java 程式使用的連接阜，NODE_MAX_INSTANCES 宣告每種瀏覽器最多可以有幾個分頁，NODE_MAX_SESSION 則宣告最多有多少瀏覽器可以平行運作，由  \-\-name 參數決定此容器的名稱以方便後續呼叫，設定完成後如圖\@ref(fig:docker-container-check)所示
+
+```{r docker-container-check, fig.width=3, fig.cap="新增 selenium container", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/docker_container_check.png")
+```
+
+## docker-Jenkins 安裝、初始化、系統設定及測試程式建置 {.tabset .tabset-fade .tabset-pills}
+
+### 下載 docker-jenkins 以及初始化
+
+使用 jenkins 建置自動化測試、建立 jira issue、 以及郵件通知，你要先準備好可以成功執行的自動化測試程式，在 shell 依序輸入以下指令來建立一個執行 docker-jenkins 的 container
+
+```{r eval = FALSE}
+# 下載最新長期穩定版 jenkins 的 image
+docker pull jenkins/jenkins:lts
+# 以本文寫作的時間而言，指令相當於這版本
+docker pull jenkins/jenkins:2.263.2
+
+# 新增 container 來執行 jenkins
+docker run -d --user root --name myjenkins -p 8080:8080 -p 50000:50000 -v <你的docker.sock位置>:/var/run/docker.sock -v <產生測試報告的位置>:/usr/src/<專案名稱> -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+
+# 查看容器運行狀態
+docker ps -a
+```
+
+指令讓 docker-jenkins 以管理者權限執行、且映射 docker.sock 位置(以 linux 系統而言在 /var/run/docker.sock)以利於後續 docker client 安裝，進而讓這個 docker-jenkins 可以以 host 身分執行 docker 指令(例如開啟/關閉 docker-selenium、新增其它 container 等)，映射你產生測試報告的位置可以讓 jenkins 找到以利後續郵件附檔形式傳送
+
+本例使用的連接阜為 8080，執行成功後打開瀏覽器，前往 *localhost:8080* 會看到 jenkins 要求輸入位於特定位址的初始密碼，如圖\@ref(fig:unlock-jenkins)所示
+
+```{r unlock-jenkins, fig.width=3, fig.cap="jenkins 要求初始密碼", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/Unlock_Jenkins.png")
+```
+
+紀錄這個位置，使用下面這個指令就可以將初始密碼顯示在螢幕上
+
+```{r eval=FALSE}
+
+# 切換至 docker-jenkins 的 container
+docker exec -it myjenkins bash
+
+# 直接讓初始密碼顯示在螢幕上
+cat <密碼位置>
+```
+
+使用初始密碼登入後，簡單弄一個使用者帳密，然後安裝建議的 plugins (預設)
+
+### 在 docker-jenkins 內安裝 docker-client {#dce}
+
+在 docker-jenkins 的 container 內，一次一行，輸入以下指令
+
+```{r eval=FALSE}
+apt-get update
+
+apt-get -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+ 
+curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey
+
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+
+apt-get update
+
+apt-get -y install docker-ce
+```
+
+### 建置自動化測試 {.tabset .tabset-fade .tabset-pills}
+
+因為這次連線的對象是 docker-selenium，首先用這個 shell 指令找到連線至 docker-selenium 的 ip 位址
+
+```{r eval=FALSE}
+# 開啟 docker-selenium container
+docker start selenium-server
+
+docker inspect selenium-server | grep Gateway
+```
+
+結果如圖\@ref(fig:docker-selenium-ip)所示
+
+```{r docker-selenium-ip, fig.width=3, fig.cap="搜尋 docker selenium ip 位址", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/docker_selenium_ip.png")
+```
+
+為了證實這個 ip 確實可以使用，如果你實際啟用瀏覽器前往 \<docker-selenium 包含 port 的 ip 位址\>/wd/hub 這個網址，會看到一個包含 session 的表格，如圖\@ref(fig:docker-selenium-check)所示，確認完成後記得將此容器關閉
+
+```{r docker-selenium-check, fig.width=3, fig.cap="確認 docker selenium ip 位址可用", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/docker_selenium_check.png")
+```
+
+#### R
+
+##### 安裝 r Plugin
+
+前往 Manage Jenkins -> Manage plugins，通常可以在 available plugins 標籤找到 r plugin。如果找不到，那就[在這裡下載最新版本的 r.hpi](https://plugins.jenkins.io/r/#releases)，下載完成後點擊 advanced 標籤，在這裡匯入 r.hpi 來安裝也可以
+
+##### 修改自動化程式
+
+將你的連線程式改成這樣並且存檔
+
+```{r eval=FALSE}
+browser <- remoteDriver(
+  remoteServerAddr = "<docker-selenium ip>",
+  browserName = "<瀏覽器名稱>",
+  port = "<docker-selenium port 數字>"
+)
+```
+
+##### 新增建置自動化測試程式專案並加入建置步驟
+
+在主頁左側清單點擊 new item，然後選擇 freestyle project 按確認，進入專案建置設定
+
+將畫面往下拉，新增三個建置步驟
+
+第一步: Execute shell --將 docker-selenium 打開
+
+```{r eval = FALSE}
+docker start selenium-server
+```
+
+第二步：Execute R script
+
+```{r eval = FALSE}
+testthat::test_dir("資料夾位置", reporter = "你的 Reporter")
+```
+
+第三步：Execute shell --關閉 docker-selenium
+
+```{r eval = FALSE}
+docker stop selenium-server
+```
+
+完成後按 save 回到專案頁面，點擊左側 build 就能進行建置，建置次數與結果會顯示在左下方，藍色代表成功，紅色代表失敗，黃色代表不穩定，點擊某次建置後，再點擊 console output 可以看到終端機執行結果，如圖\@ref(fig:jenkins-build)所示
+
+```{r jenkins-build, fig.width=3, fig.cap="jenkins 建置與查看結果", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_build.png")
+```
+
+#### java
+
+##### 修改自動化程式
+
+改用 RemoteWebDriver 來啟動 docker-selenium
+
+```{r eval=FALSE}
+// 開啟 chrome 瀏覽器
+//System.setProperty("webdriver.chrome.driver", "<chromedriver 位置>");
+//driver = new ChromeDriver();
+driver = new RemoteWebDriver(new URL("<你的 docker-selenium ip>:<docker-selenium port>/wd/hub"), new ChromeOptions());	
+```
+
+##### 新增建置自動化測試程式專案並加入建置步驟
+
+在主頁左側清單點擊 new item，然後選擇 freestyle project 按確認，進入專案建置設定
+
+新增一個 Execute shell 建置步驟
+
+```{r eval=FALSE}
+set +e
+docker start selenium-server
+docker run --rm -v <你的專案位置>:/usr/src/<專案名稱>  -v ~/.m2:/root/.m2 -w /usr/src/<專案名稱> maven:3.6.3-jdk-11 mvn install
+cp -R /usr/src/<專案名稱> /var/jenkins_home/workspace/<這個 freestyle project 名稱>
+docker stop selenium-server
+```
+
+因為 jenkins 執行 shell 指令時會帶有 -xe 選項，其中 -x 可以印出所有執行過程，而 -e 表示遇到錯誤訊息就中斷後續指令，set +e 用意是讓 shell 就算遇到錯誤訊息也要繼續執行，就算測試程式出現測試失敗的情況也會繼續執行  
+docker run 會用 image 建立新的 container 來執行指令，此例 image 是 maven:3.6.3-jdk-11 ---也就是 maven 3.6.3 版並且使用 openjdk-11，指令是 mvn install ---也就是建置專案，\-\-rm 參數代表完成 container 工作後將其移除，-v 代表將資料夾與 container 位置同步，此例將位於 host 上的專案連結至 /usr/src/<專案名稱>，.m2 資料夾是 maven 專案儲存匯入 .jar 檔的地方，連結至 container 後，專案建置會找到這個資料夾並且匯入，就不用再花時間下載已經存在的 .jar 檔，-w 設定工作位址---也就是 host 上專案連結至新 container 內的位置  
+cp -R 可以複製整個資料夾以及內容至指定位置，由於上一行 docker run 指令執行專案產生的測試報告會出現在 /usr/src/<專案名稱> (從 host <產生報告的位置> 映射過去，這是一開始安裝 docker-jenkins 時建立的連結)，將其複製到 /var/jenkins_home/workspace/<這個 freestyle project 名稱> ---也就是這個專案的工作位址， docker-jenkins 就能找到產出的測試報告
+
+完成後按 save 回到專案頁面，點擊左側 build 就能進行建置，建置次數與結果會顯示在左下方，藍色代表成功，紅色代表失敗，黃色代表不穩定，點擊某次建置後，再點擊 console output 可以看到終端機執行結果，如圖\@ref(fig:jenkins-build2)所示
+
+```{r jenkins-build2, fig.width=3, fig.cap="jenkins 建置與查看結果", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_build.png")
+```
+
+### 傳送建置結果與測試報告至信箱
+
+#### 前往 管理 jenkins -> 設定系統
+
+在 jenkins 位置，系統管理員郵件地址輸入收信者會看到的寄信者信箱，如圖\@ref(fig:jenkins-settings-jenkins-location)所示
+
+```{r jenkins-settings-jenkins-location, fig.width=3, fig.cap="jenkins location 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_settings_jenkins_location.png")
+```
+
+在擴充電子郵件通知點擊進階按鈕，依序在以下條目輸入：
+
+* SMTP server：smtp.gmail.com
+* SMTP Port：465
+* SMTP username：轉寄用的 gmail 信箱
+* SMTP password：轉寄用的 gmail 密碼
+* Use SSL：打勾
+* Default user e-mail suffix：收件者預設信箱後綴位址，例如 @gmail.com
+* 預設收件人：如果有設定上面這項，打郵箱前置名，如果有多位預設收件人就用英文逗號隔開，這樣寄信的信箱會自動變成 "人名\@預設信箱"，也可以直接輸入完整信箱來跳過上面一項的設置或是複寫它一次
+* 預設主旨：自訂信件主旨
+* 預設內容：自訂信件內容，加入'${BUILD_LOG}'可將建置過程放入信件內容
+
+輸入完成後如圖\@ref(fig:jenkins-settings-extended-email-notification)所示
+
+```{r jenkins-settings-extended-email-notification, fig.width=3, fig.cap="extended email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_settings_extended_email_notification.png")
+```
+
+在電子郵件通知點擊進階按鈕，依序在以下條目輸入：
+
+* SMTP 伺服器：smtp.gmail.com
+* 預設使用者信箱後墜字串：收件者預設信箱後綴位址，例如 @gmail.com
+* Use SMTP Authentication: 打勾
+* 使用者名稱：轉寄用的 gmail 帳號
+* 密碼：轉寄用的 gmail 密碼
+* 使用 SSL: 打勾
+* Use TLS: 打勾
+* SMTP 連接阜：465
+
+下方選擇寄測試信，確認信件可以傳送且信箱有確實收到測試信，你可能要先確定此機器可成功登入轉寄用的 gmail 帳號，也可能需要降低 gmail 的安全性設定使其可以讓第三方轉寄郵件，如圖\@ref(fig:jenkins-settings-email-notification)所示
+
+```{r jenkins-settings-email-notification, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_settings_email_notification.png")
+```
+
+完成以上條目的設定後儲存
+
+#### 在你的 jenkins 專案組態內，設定建置後動作
+
+在建置後動作標籤下點擊新增建置後動作選單，並點擊電子郵件通知，在新增視窗的收件人條目輸入 $DEFAULT_RECIPIENTS (也就是主要郵件設定的預設接收人)，如圖\@ref(fig:jenkins-configure-email-notification)所示
+
+```{r jenkins-configure-email-notification, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_configure_email_notification.png")
+```
+
+接著新增可攜式電子郵件通知，點擊下方 Advanced settings... 按鈕，找到 Triggers 條目，點擊舊 trigger 右上方的紅色 X 將其移除，點擊下方 Add trigger 選擇 Always，將其內的 Send to 換成 Recipient list，再點擊進階按鈕，在 Attachments 條目新增你 workspace 裡面的測試報告檔案(以附檔形式送至信箱)，如圖\@ref(fig:jenkins-configure-editable-email-notification)所示
+
+```{r jenkins-configure-editable-email-notification, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_configure_editable_email_notification.png")
+```
+  
+設定完成後儲存，以後每次建置完成後，信箱就會收到設定好的內容
+
+### 產生精美 cucumber report
+
+只對 java 的 cucumber 專案有效
+
+#### 安裝 Cucumber reports plugin
+
+在主頁前往 管理 Jenkins -> 管理外掛程式，通常可以在可用的標籤找到 cucumber-reports plugin。如果不行，那就[在這裡下載最新版本的 cucumber-reports.hpi](https://plugins.jenkins.io/cucumber-reports/#releases)，下載完成後點擊進階標籤，在這裡上傳 cucumber-reports.hpi 外掛程式也可以
+
+#### 在 jenkins 專案組態內，於建置後動作新增 cucumber reports
+
+如果要產出 cucumber 報告，必須要使用產出的 .json 檔案，確定你的 RunCucumberTest.java 有設定 .json 產出，由於前述 Execute shell 步驟會將產出的報告複製到 workspace，jenkins 會自動找到 .json 檔並產出網頁版報告
+
+在建置後步驟標籤下點擊新增建置後動作選單，點擊 cucumber reports，如圖\@ref(fig:jenkins-configure-cucumber-report)所示，然後點擊 save
+
+```{r jenkins-configure-cucumber-report, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_configure_cucumber_report.png")
+```
+
+產出的 cucumber report 可以在專案首頁找到，如圖\@ref(fig:jenkins-project-cucumber-report)所示
+
+```{r jenkins-project-cucumber-report, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_project_cucumber_report.png")
+```
+
+### 將錯誤報告上傳至 jira issue
+
+#### 安裝 JiraTestResultReporter plugin
+
+前往管理 Jenkins -> 管理外掛程式，通常可以在可用的標籤找到 JiraTestResultReporter plugin。如果找不到，那就[在這裡下載最新版本的 JiraTestResultReporter.hpi](https://plugins.jenkins.io/JiraTestResultReporter/#releases)，下載完成後點擊進階標籤，在這裡上傳 JiraTestResultReporter.hpi 外掛程式也可以
+
+#### 前往 管理 jenkins -> 設定系統 調整 JiraTestResultReporter 設定
+
+* Jira URL: 你的 jira 網址
+* Username: 你的 jira 帳號
+* Password: 你的 jira 密碼
+
+輸入以上三個條目後點擊 Vaildate settings 確認 jenkins 可以連上 jira，注意此帳戶必須有權利建立新 jira issue，之後點擊進階按鈕
+  
+* Default Summary: 自訂 jira issue summary 的格式，可維持預設
+* Default Description: 自訂 jira issue description 的格式，可維持預設
+
+設定完成如圖\@ref(fig:jenkins-settings-jira)所示，按儲存
+
+```{r jenkins-settings-jira, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_settings_jira.png")
+```
+
+#### 在 jenkins 專案組態內，於建置後動作新增 發佈 JUnit 測試結果報告
+
+JiraTestResultReporter 是利用 JUnit 產出的測試報告找出哪些測試失敗了，而 JUnit 需要 .xml 檔產出測試報告，確定你的 RunCucumberTest.java 有設定 .xml 產出
+
+在建置後動作標籤下新增建置後動作，點擊發佈 JUnit 測試結果報告並調整設定：
+
+* 測試報告 XML: <測試報告 .xml檔位置，注意這裡路徑是相對於專案 workspace>
+* Additional test report features: 新增 JiraTestResultReporter
+* Project key: 指定 jira project 內完全大寫的英文 key，例如 BUG 
+
+點擊 Validate settings 確認連線與 key 沒有問題
+
+* Issue Type: 連線成功後會自動跑出選項，選擇需要的
+
+設定完成如圖\@ref(fig:jenkins-configure-jira)所示，按 save
+
+```{r jenkins-configure-jira, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_configure_jira.png")
+```
+
+回到專案首頁，建置專案後進入 test result，可以看到 JUnit 的測試結果，如果有失敗的案例也會顯示，如圖\@ref(fig:jenkins-project-jira)所示，點擊案例左側的藍色十字查看錯誤訊息，點擊案例右側的藍色十字決定如何建立 jira issue (建立一個新 issue 或是指定一個現有的 issue)，就算以後再次建置也不用擔心重複建立 issue 的問題
+
+```{r jenkins-project-jira, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_project_jira.png")
+```
+
+### 設定上版觸發建置
+
+本例使用的是 Azure DevOps 上版觸發一般 jenkins 專案建置的操作，請注意：設定此操作的帳號必須有權利對 Azure 專案的 repo 進行上版和修改的權限，也要確保 jenkins 對應連接阜是對外開放的狀態
+
+在 jenkins 頁面點擊右上方帳號，點擊左側的設定，然後新增一個 API Token，如圖\@ref(fig:jenkins-API-token)所示，創建成功會出現一長串字串，將其複製到記事本上備用，小心網頁重新整理後，長字串會消失
+
+```{r jenkins-API-token, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/jenkins_API_token.png")
+```
+
+前往 https://<Azure 公司名稱\>.visualstudio.com/\<Azure 專案名稱\>/_settings/serviceHooks，點擊 Create a new subscription，左側清單下拉點選 jenkins，按 Next，上方 Trigger 選擇 code checked in，確認下面確實是你的專案後按 Next，確認上面 action 是 Trigger generic build，Setting 欄位依序輸入 你的 jenkins 網址、你的 jenkins 帳號和剛才新建的 API token，如圖\@ref(fig:azure-service-hook)所示，如果設定正確，Build 選單會出現所有這個 jenkins 帳號內的專案，選擇後按 test，確認這樣有成功觸發建置後，按 finish，有了這項設定，只要這個 repo 有上版/修改的動作就會觸發 jenkins 專案建置
+
+```{r azure-service-hook, fig.width=3, fig.cap="email notification 設定", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/azure_service_hook.png")
+```
+
+# R 語言採用 testthat 套件自動化測試程式寫作 {.tabset .tabset-fade .tabset-pills}
+
+為了提高工作效率和工作水平，測試工作需要引進自動化測試工具，節省測試時間並提高準確度
+
+## testthat 寫作結構
+
+依據測試案例，把每一個測試項寫成一個測試程式碼，這些程式碼檔名必須以 test 開頭，模擬使用者操作，寫出對應的程式，並註明預期結果，首先要匯入必要套件
+ 
+```{r eval = FALSE}
+# 匯入必要套件，這屬於前置動作
+library(RSelenium) 
+library(testthat)
+```
+
+你的測試程式結構長這樣
+
+```{r eval = FALSE}
+# 這裡是前置動作
+
+# 這裡開始寫用例，格式像這樣：
+describe("用例名稱1". {
+  it("測試條件 步驟1名稱". {
+    # 這裡是測試步驟
+  })
+  it("測試條件 步驟2名稱", {
+    # 這裡是測試步驟
+    # 在正確的時機加入預期結果檢驗程式碼
+  })
+  ...
+  it("沒有大括號") # 可以穿插這行，其沒有動作
+  ...
+})
+...
+describe("用例名稱n", {
+  ...
+})
+
+# 這裡是結束動作，例如加入預處理資料
+```
+
+在測試條件裡穿插期望結果，用來了解預期的現象是否發生，形成單元測試程式碼，以下為幾個常用的
+
+```{r eval = FALSE}
+expect_equal(值1, 值2) # 預期兩個值一樣，不限於數字型態
+expect_gt(值1, 值2) # 預期值1大於值2
+expect_gte(值1, 值2) # 預期值1大於等於值2
+expect_lt(值1, 值2) # 預期值1小於值2
+expect_lte(值1, 值2) # 預期值1小於等於值2
+
+expect_false(判斷條件) # 預期判斷條件是錯的
+expect_true(判斷條件) # 預期判斷條件是對的
+
+expect_length(清單, 數字) # 預期清單長度等於數字
+```
+
+## testthat 執行測試
+
+在你準備好自動化測試程式碼後，把它們放在同一個資料夾內，在 R 主視窗執行這個程式碼：
+
+```{r eval = FALSE}
+testthat::test_dir("資料夾位置", reporter = ProgressReporter())
+```
+
+確認可以完整執行一次並且有測試統計產出，reporter 的用途就是整合測試與資料並產生報告，此例使用的是預設值，其他種類如 CheckReporter、DebugReporter、FailReporter、ListReporter、LocationReporter、MinimalReporter、MultiReporter、ProgressReporter、RstudioReporter、SilentReporter、StopReporter、SummaryReporter、TapReporter、TeamcityReporter 等各有其用處及格式，讀者可以實驗並選出最適合的 reporter
+
+## MSSQL 資料庫操作相關程式
+當你遇上這類測試，通常測試模組(用例)會註明刪除某資料表的特定資料，測試結束後將預處理資料加回去
+
+首先要連線至 MSSQL 資料庫，注意連接阜必須為1433
+
+```{r eval = FALSE}
+library(odbc)
+library(DBI)
+# 與資料庫建立連線
+con <- DBI::dbConnect(odbc::odbc(),
+                      Driver   = "資料庫連線驅動程式，例如 SQL erver",
+                      Server   = "資料庫伺服器網址",
+                      Database = "資料庫名稱",
+                      UID      = "帳號",
+                      PWD      = "密碼",
+                      Port     = 1433)
+```
+
+在前置作業，根據測試模組提供的搜尋條件找到預處理資料，用變數接收以便於之後新增回資料表，注意這過程要寫在前置作業而不是測試步驟，每個 it 函數內若有定義變數，在此 it 執行完後，變數資料會消失，以下提供 MSSQL 操作相關程式碼
+
+```{r eval = FALSE}
+## 以下這些要寫在前置動作
+
+# 讀取所有資料
+#data <- dbReadTable(con, 資料表)
+
+# 搜尋與確認欲刪除資料
+results <- dbSendQuery(con, "SELECT * FROM 資料表 
+                       WHERE 特定條目 = 特定條件") # 搜尋欲刪除的資料
+Sys.sleep(3) # 設定搜尋秒數
+result1 <- dbFetch(results, n = 100) # 取得前100筆結果
+
+## 以下這些要寫在測試模組內
+
+# 刪除資料
+dbExecute(con, "DELETE FROM 資料表 WHERE 特定條目 = 特定條件")
+```
+
+在測試結束以後，如果基於測試的某些步驟，額外新增資料至資料庫，記得先確認然後將其刪除，再將預處理資料加回，也就是說，你要檢查測試步驟新增的資料必須容易搜尋且不會找到其他原先在資料庫的資料，通常會提供資料庫表格資料明細，這樣可以知道網頁新增的資料會存存至哪個資料表，以及資料表各欄位資料的形式和意義
+
+```{r eval = FALSE}
+# 手動新增資料
+dbExecute(con, "INSERT INTO 資料表 (
+                欄位1,
+                欄位2,
+                ...
+                ) VALUES (
+                值1,
+                值2,
+                ...
+                )"
+)
+
+# 或是新增在前置動作就已儲存的預處理資料
+dbWriteTable(con, "資料表", result1, append = TRUE)
+```
+
+## 瀏覽器操作相關
+實作前請確認 selenium 伺服器是開啟的(見\@ref(selenium))，在開啟瀏覽器之前，要先設定相關資訊
+
+```{r eval = FALSE}
+browser <- remoteDriver(
+  remoteServerAddr = "localhost",
+  browserName = "瀏覽器種類",
+  port = Selenium 伺服器連接阜
+)
+```
+
+接下來就可以進行一些基本操作
+
+```{r eval = FALSE}
+browser$open() # 開啟瀏覽器
+browser$navigate("網址") # 前往網站
+browser$maxWindowSize() # 視窗最大化
+browser$goBack() # 回上一頁
+browser$goForward() # 回下一頁
+browser$getCurrentUrl() # 取得網址
+browser$refresh() # 重新整理
+```
+
+### 選擇物件
+在網頁上按右鍵然後檢查網頁原始碼．在這裡，網站的每個物件都是用標籤顯示，根據欲選擇物件的特性來決定選擇方式，以 id 和 name 特性抓取物件最快最簡單也最可靠
+
+```{r eval = FALSE}
+物件 <- browser$findElement(using = "id/name/css selector/class/tag name/xpath", 
+                          value = "條件值") # 選擇物件
+物件清單 <- browser$findElements(using = "name/css selestor/class/tag name/xpath", 
+                          value = "條件值") # 選擇物件清單
+子物件 <- 物件$findChildElement(using = "name/css selestor/class/tag name/xpath", 
+                          value = "條件值") # 選擇子物件
+子物件清單 <- 物件$findChildElements(using = "name/css selestor/class/tag name/xpath", 
+                          value = "條件值") # 選擇子物件清單
+browser$mouseMoveToLocation(webElement = 物件) # 若物件未顯示，將畫面捲動至顯示物件為止
+物件$getElementAttribute("id/name/class/value/...") # 獲得物件屬性值
+物件$clickElement() # 點擊物件
+物件$highlightElement(wait = 1) # 將物件變顯眼一段時間
+物件$sendKeysToElement(list("文字", key = "按鍵")) # 對物件輸入文字和按鍵操作
+輸入格物件$clearElement() # 將輸入格內文字全部清空 
+物件$getElementText() # 獲得物件內部文字
+物件$getElementSize() # 獲得物件大小與位置
+物件$getElementSize()$width # 獲得物件寬度，其他三個變數類似
+```
+
+如果是輸入資料，盡量輸入含有特殊字元或是非本土字元，用意是測試這些文字內容不會導致網頁產生無法預期或是不合理的狀態(例如在數字資料存入英文字)，也可以測試網站對於這些不合理的字元是否有應對機制(例如數字資料內的英文字會被網頁警告)
+
+### 登入頁面
+其中一個判斷是否已登入的方法就是查看某特定 cookie 是否出現，如果特定 cookie 沒有出現，就表示尚未登入，要進行登入操作
+
+```{r eval = FALSE}
+logInflag <- TRUE
+cookies <- browser$getAllCookies() # 獲得目前所有 cookie
+for (i in 1:length(cookies)) {
+  if (cookies[[i]][["name"]] == "目標cookie") {
+    logInflag <- FALSE
+    break
+  }
+}
+
+if (logInflag) {
+    # 在這裡寫登入操作
+}
+```
+
+### 重複動作處理
+有些網頁操作的重複性質很高，例如「使用左側選單在不同網站間移動」，為了方便起見，將每種重複動作寫成各個函數，以後只要出現這一步，一句程式碼呼叫函數並添加參數就能完成動作，在定義函數時適當的選擇參數有助於提高函數彈性，並使其可以進行類似的不同操作，而且寫成函數也有助於 debug，修改程式只要修函數就好，不需要跑遍整個程式碼
+
+```{r eval = FALSE}
+# 將重複步驟定義成一個函數
+函數名稱 <- function(參數1 = 預設值1, 參數2, ...) {
+  # 在這裡定義怎麼操作
+  # 修改動作時只要修改這裡就好
+}
+
+...
+
+# 在需要執行這布時，呼叫它
+函數名稱(參數1值, 參數2值, ...)
+```
+
+### 切換至其他網頁框架
+有些網站會將網頁分割成不同的網頁框架，例如 R 官網是由三個網頁框架組成，使用程式操作時，你必須將瀏覽器物件切換至對應框架才能對其內的物件進行操作
+
+```{r eval = FALSE}
+formWindow <- browser$findElements(using = "css", value = "iframe") # 獲得網頁框架物件群
+#length(formWindow) # 確認框架數量
+XML::htmlParse(browser$getPageSource()[[1]]) # 取得目前框架內的網頁原始碼
+browser$switchToFrame(formWindow[[1]]) # 切換至第一個框架
+browser$switchToFrame(NA) # 切換至預設框架
+```
+
+### 選單測試
+這裡選單可以指排列整齊、每個子物件形式固定的清單，或是表單內的下拉式選單，一般情況下，在你選擇清單主體後，你可以藉由選擇符合規則的多個子元素來獲得子元素清單，如果選單本體為 select 標籤，套件提供專門方法來處理，內容多半為測試選單內容、長度等，選擇指定選項時，使用「名稱」而不是「位置」可以避免網頁新增更多選項而帶來的錯誤
+
+```{r eval = FALSE}
+# 以下通常用來處理一般清單
+選項名稱清單 <- unlist(lapply(清單物件, 
+                            function(e) { e$getElementText() })) # 獲得選項名稱清單
+清單物件[[which(選項名稱清單 == "選項值")]]$clickElement() # 選擇指定選項
+
+# 專門處理標籤為 select 的下拉式選單
+expect_false(is.element('選項值', 選單物件$selectTag()$text)) # 驗證選項沒有在選單內
+expect_true(is.element('選項值', 選單物件$selectTag()$text)) # 驗證選項有在選單內
+選單物件[[which(選單物件$selectTag()$text == "選項值")]]$clickElement() # 選擇指定選項
+```
+
+### 警告視窗相關測試
+檢查特定動作會不會觸發警告視窗，並且確認警告視窗的內容正確
+
+```{r eval = FALSE}
+expect_equal(browser$getAlertText()[[1]], "警告訊息") # 確認警告訊息正確
+browser$acceptAlert() # 點擊警告視窗的確認鍵
+```
+
+### 確認文字內容
+確認某物件文字內容符合條件
+
+```{r eval = FALSE}
+expect_false(物件$getElementText()[[1]] == "值") # 確認此物件文字內容不是這個值
+expect_equal(物件$getElementText()[[1]], "值") # 確認此物件文字內容是這個值
+expect_equal(物件$getElementAttribute("屬性")[[1]], "值") # 確認物件屬性值
+```
+
+### 確認表格資料行數
+基本上就是確認 tr 標籤清單的長度
+
+```{r eval = FALSE}
+tablelist <- browser$findElements(using = "tag name", value = "tr")
+expect_length(tablelist, n)
+```
+
+### 匯入檔案
+找到對應的 input 標籤物件，記錄你檔案的路徑，將其使用 sendKeysToElement 方法就可以搞定
+
+```{r eval = FALSE}
+input標籤物件$sendKeysToElement(list('檔案路徑'))
+```
+
+### 決定檔案下載位置
+
+在一開始開啟瀏覽器時設定
+
+```{r eval=FALSE}
+# 設定下載資訊
+eCaps <- list(
+  chromeOptions = 
+    list(prefs = list(
+      "profile.default_content_settings.popups" = 0L,
+      "download.prompt_for_download" = FALSE,
+      "download.default_directory" = "<你的下載位置>"
+    )
+    )
+)
+
+browser <- remoteDriver(
+  remoteServerAddr = "localhost",
+  browserName = "瀏覽器種類",
+  port = Selenium 伺服器連接阜,
+  extraCapabilities = eCaps
+)
+```
+
+### 讀取 excel 檔
+
+以下提供一些基本操作
+
+```{r eval=FALSE}
+library(readxl)
+
+# 回傳 .xls 的所有資料表名稱陣列
+excel_sheets("<你的.xls路徑>") 
+
+# 以二維陣列形式讀取資料，可指定資料表
+data <- read_xls(""[, sheet = 1])
+
+# 得到資料行數
+nrow(data) 
+
+# 得到資料列標題陣列
+colnames(data)
+```
+
+
+## 程式碼沒有正常運作的處理方法
+資料表無法取出或存入?網頁找不到指定物件?點擊物件的指令無效?通常是套件 bug 、網頁設計不良、或是在網頁載入完成以前就執行程式碼造成，通常重新整理網頁、實際「監督」瀏覽器動作、設定程式碼暫停時間、或是捲動頁面就可以處理，如果這些動作都沒有幫助，檢查程式碼操作是不是有問題
+
+### 資料因 IDENTITY_INSERT 無法存入
+錯誤訊息為 "Cannot insert explicit value for identity column in table when IDENTITY_INSERT is set to OFF." ，解決方法是先將 IDENTITY_INSERT 調成 ON，立刻將預處理資料插入，然後將其調成 OFF
+
+```{r eval = FALSE}
+dbExecute(con, "SET IDENTITY_INSERT 資料表 ON
+
+               INSERT INTO 資料表 (
+                欄位1,
+                欄位2,
+                ...
+                ) VALUES (
+                值1,
+                值2,
+                ...
+                )
+
+                SET IDENTITY_INSERT 資料表 OFF"
+)
+```
+
+### 資料因 Invalid Descriptor Index 錯誤而無法取出
+這算是 MSSQL 一直都存在的 bug，如果發生了，就要檢查資料表欄位大小，將資料量最大的欄位移至搜尋最後方，同時注意將其寫在前置動作，畢竟要完全復原一欄大資料是非常費工的事
+
+```{r eval = FALSE}
+# 前置動作
+results <- dbSendQuery(con, "SELECT
+                           欄位1,
+                           欄位2,
+                           ...
+                           欄位n,
+                           最大欄位 FROM 資料表 WHERE 指定欄位 = 條件")
+Sys.sleep(1) # 設定搜尋時間
+result1 <- dbFetch(results, n = 100) # 用一個獨立變數接收結果
+
+# 這裡是測試模組程式碼
+...
+# 測試完成後，新增預處理資料
+dbWriteTable(con, "資料表", result1, append = TRUE) # 使用上面的獨立變數
+```
+
+### 該執行的程式碼有時候沒有執行?
+以下這段程式碼的想法是「若執行了真的沒有效果，就再試一次」，適用於網頁載入速度不穩定，或是時常未執行的程式碼
+
+```{r eval = FALSE}
+while(TRUE){
+  tryCatch({
+    # 這裡是「問題程式碼」沒執行就會錯誤的程式碼
+    break # 如果成功就會結束迴圈，並且繼續執行
+  }, error = function(msg){
+    # 這裡是「問題程式碼」
+    Sys.sleep(5) # 通常會讓程式暫停一段時間
+  })
+}
+```
+
+### 目標物件被浮動物件擋住，使點擊失去效果?
+捲動頁面，讓目標物件不會被浮動物件擋住，可以解決大部分情況，盡量避免執行多個重複捲動指令，因為重複執行網頁捲動很難控制網頁最後停在何處，捲動網頁主要依靠 mouseMoveToElement 方法
+
+```{r eval = FALSE}
+webBody <- browser$findElement(using = "css", value = "body")
+webBody$sendKeysToElement(list( # 捲動網頁 往上一小段/往下一小段/往上一大段/往下一大段
+  key = "up_arrow/down_arrow/page_up/page_down/home/end")) # /網頁最上方/網頁最底部
+Sys.sleep(0.5) # 暫停程式碼一小段時間，讓網頁捲動完成
+```
+
+### 沒辦法輸入特殊符號
+有三個特殊符號要注意:「\\」、「'」和「"」，使用 sendKeysToElement 方法如果要輸入這些特殊符號，記得把它們用跳脫字元方式處理:「\\\\」、「\\'」和「\\"」
+
+# 使用 cucumber 進行 BDD 開發與 CI
+
+本章節將介紹 cucumber 套件，使用 eclipse 寫作 cucumber 與 selenium 整合的 jUnit 測試程式架構並產生測試報告
+
+## Cucumber 簡介 {#cucumber}
+Cucumber 是一個支援 BDD 的工具，支援三個重要目的：
+
+* 能描寫明確可執行的規格書 (Specification)，具備人類語意可讀性，同時 Cucumber 也能解析。
+* 能透過 Cucumber 進行自動化測試，驗證軟體是否符合規格書的描述。
+* 能透過規格書，將軟體的功能行為文件化。
+
+## 在 eclipse 上安裝 cucumber plugin
+
+這個 plugin 讓 eclipse 可以認得規格書檔案---也就是 .feature 檔
+
+在最上方的功能列前往 help -> eclipse marketplace，搜尋 cucumber plugin 然後安裝
+
+## 在 eclipse 上使用 maven 建立一個 cucumber 專案
+
+使用 maven 有許多好處：自動匯入需要的 .jar 檔，執行專案只需要指定資料夾，建立專案附送執行框架，方便與 docker-maven 整合等
+
+前往 File -> New -> Project...，選擇 Maven Project 按 Next，按 Next，選擇 Group id 為 io.cucumber 的 archetype 按 Next，決定專案名稱按 Finish，系統就會幫你建置 cucumber 專案 
+
+## 匯入 selenium .jar 檔 {#javaSelenium}
+
+編輯位於專案最上層的 pom.xml 檔，在 \<dependencies\> 標籤內加入 selenium-java 程式套件(至 2020 年尾，穩定的最新版本數為 3.141.59)
+
+```{r eval=FALSE}
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-java</artifactId>
+    <version>3.141.59</version>
+</dependency>
+```
+
+## 執行 cucumber 專案
+
+右鍵點擊位於 src/test/java/<你的專案> 內的 RunCucumberTest.java 檔 -> Run As -> JUnit Test
+
+## cucumber 專案實作 {.tabset .tabset-fade .tabset-pills}
+
+### cucumber 規格書(.feature 檔)寫作說明
+
+建立 io.cucumber 專案框架後，規格書的位置要存放在 /src/test/resources/<專案名稱> 資料夾或其子資料夾內
+
+在資料夾點右鍵 -> New -> File，命名為「我的測試.feature」按 finish，cucumber plugin 就會產生一個預設的 .feature 檔內容
+
+#### 重要術語
+
+Cucumber 在測試規格書有幾個重要術語，非常容易理解，分別是 Specification、Scenario、 Step，他們的關係如下：
+
+* 在 Cucumber 裡，每一個使用情境或測試案例稱為一個 Scenario。
+* 每一個 Scenario 有很多個 Step 要進行。
+* 多個功能相近的 Scenario 可以被寫在同一份 Specification 檔案裡。
+* 在 Cucumber 裡，一個 Specification 檔也被稱為 feature 檔。
+* 一個專案有各種不同的功能模組，可以把所有的 Scenario 分成多個 Specification 檔便於管理。
+
+#### Cucumber 規格書結構
+
+由於 Specification 檔必須是可執行的 (Executable)，在 Cucumber 裡使用一個名叫 Gherkin 的語法結構來描述：
+
+```{r eval=FALSE}
+Feature: 一句話簡介這份規格書所涵蓋的軟體功能
+  對這份規格書更多的介紹 (非必要，不影響自動測試)
+  介紹....
+  介紹....
+
+  Scenario: 要測試的測試案例 1
+    Given 前提條件是....
+    When 我做了某件事....
+    Then 結果應該得到...
+    
+  Scenario: 要測試的測試案例 2
+    Given 前提條件是....
+    When 我做了某件事....
+    Then 結果應該得到...
+```
+上面結構裡，Scenario 底下每一行，無論開頭關鍵字是 Given、When、Then，都代表一個要進行的 Step，在句子開頭加上 \# 就是註解，編譯時會跳過這行
+
+#### Step 開頭關鍵字
+
+Gherkin 所撰寫的 Step，開頭都會帶一個關鍵字，便於理解這一個步驟的性質。
+
+* Given:前置條件的設置
+* When:發生一個事件
+* Then:驗證預期結果
+* And/But:如果有連續多個 Given/Then，第二個開始可以用 And/But 更貼近人類語意
+
+gherkin 語法支援超過 70 種語言，其中包括繁體中文，繁體中文的規格書寫作可以夾雜英文，只要在規格書第一行加上「# language: zh-TW」就可以了，例如：
+
+```{r eval=FALSE}
+# language: zh-TW
+功能: 頁面凍庫選項檢查
+	本測試將檢查每個頁面是否正常顯示或不顯示凍庫選項
+	
+	場景: 網頁登入
+		假如 使用 chrome 瀏覽器前往網站
+		當 還沒登入時輸入帳號密碼按確定
+		那麼 進入首頁
+```
+
+以下是 gherkin 關鍵字翻成繁體中文的對照表，有些關鍵字提供不只一種翻譯，值得注意的是，given、when、then 都可以用 \* 表示
+
+|English Keyword|Chinese traditional equivalent(s)|
+|:--------------|:--------------------------------|
+|feature	       |功能                             |
+|background	     |背景                             |
+|scenario	       |場景                             |
+|                |劇本                             |
+|scenario Outline|場景大綱                         |
+|                |劇本大綱                         |
+|examples	       |例子                             |
+|given	         |\*                               |
+|                |假如                             |
+|                |假設                             |
+|                |假定                             |
+|when       	   |\*                               |
+|                |當                               |
+|then	           |\*                               |
+|                |那麼                             |
+|and	           |\*                               |
+|                |而且                             |
+|                |並且                             |
+|                |同時                             |
+|but	           |\*                               |
+|                |但是                             |
+
+#### Cucumber 規格書增加 Step 定義的重用性 (Reusability)
+
+事實上 Cucumber 還有很多撰寫技巧有助於提高重用性，例如 Scenario Outline，要點如下
+
+* 原本的 Scenario: 改成 Scenario Outline:
+* 將要參數化的地方用 <OOO> 表示，例如 <year>, <month>, <day>, <answer>
+* 增加一個 Examples 列表，將 <year>, <month>, <day>, <answer> 設定多組想測試的值
+
+```{r eval=FALSE}
+Feature: Is it Friday yet?
+  Everybody wants to know when it's Friday
+
+  Scenario Outline: Today is or is not Friday
+    Given today is Year <year>, Month <month>, Day <day>
+    When I ask whether it's Friday yet
+    Then I should be told "<answer>"
+
+    Examples:
+      | year | month | day | answer |
+      | 2020 | 1     | 1   | Nope   |
+      | 2020 | 1     | 3   | TGIF   |
+      | 2019 | 9     | 6   | TGIF   |
+      | 2019 | 9     | 7   | Nope   |
+```
+
+相同的 Step 可以用相同的一句話表示，只要是寫在同一個 cucumber 專案內就可以用共同一個函數實作，但要小心相同的一句話但操作不同的情況會導致後續的實作變得複雜，如果類似的 Step 可以用相同的方式實作，建議改成同樣句子或採用此 Scenario Outline 合併簡化
+
+輸入的 Step 定義如果含有數字而且前後都是空白，產生實作框架時，數字就會當成參數傳入函數，型態是 Integer，如果要傳入字串，用雙引號夾住，前後留白就行了，例如：
+
+```{r eval=FALSE}
+那麼 警報資料庫新增 1 筆 "危險駕駛" "有錄一次輕度加速0下" 嚴重度 1 警報 
+
+->
+  
+@那麼("警報資料庫新增 {int} 筆 {string} {string} 嚴重度 {int} 警報")
+	public void 警報資料庫新增_筆_嚴重度_警報(Integer rows, String ruleType, String ruleName, Integer severity) {
+		//在這裡實作
+	}
+```
+
+#### 加入標籤
+
+標籤很適合用來整理 feature 和 scenario，其中一個用途是執行一部份測試，標籤的宣告方式是在\@後面加上文字，並且放在 Feature(功能), Scenario(背景), Scenario Outline(場景大綱) 或是 Examples(例子) 上面，標籤不能放在 Background(背景), Given(假如), When(當) 或 Then(那麼) 上面，例如：
+
+```{r eval=FALSE}
+場景: 前往配件管理頁面	
+	假如 左側選單已點開
+	當 操作選單從 "基礎資料" 點擊 "配件管理" 網頁	
+
+@HarshDriving
+場景: 新增DVR配件至測試車輛
+	當 "DVR" 配件欄新增配件種類 "DVR" 配件型號 "通立DVR" 配件編號 "teuton臨時DVR測試" 顯示名稱 "臨時DVR"
+
+@DoorLock
+場景: 新增門位配件至測試車輛
+	當 "GPIO9" 配件欄新增配件種類 "Door Lock" 配件型號 "Door Lock" 配件編號 "teuton臨時DL測試" 顯示名稱 "臨時門位"
+```
+
+一個功能或場景可以有多個標籤，用空白隔開：
+
+```{r eval=FALSE}
+@HarshDriving @Temperature @DoorLock @LDWS
+場景: 前往配件管理頁面	
+	假如 左側選單已點開
+	當 操作選單從 "基礎資料" 點擊 "配件管理" 網頁
+```
+
+feature 檔中，子元素會繼承父元素的標籤，放在 feature 的標籤，其下方的 Scenario, Scenario Outline 和 Examples 也會繼承此標籤；放在 Scenario Outline 的標籤，其下方的 Examples 也會繼承此標籤。以下兩個例子是同一個意思：
+
+```{r eval=FALSE}
+@alarm
+功能: 警報測試
+
+	@HarshDriving
+	場景: 網頁登入
+		當 還沒登入時輸入帳號密碼按確定
+```
+
+```{r eval=FALSE}
+@alarm
+功能: 警報測試
+
+	@alarm @HarshDriving 
+	場景: 網頁登入
+		當 還沒登入時輸入帳號密碼按確定
+```
+
+只要適當的加入標籤，你可以使 cucumber 專案只執行一部份程式  
+第一個方法：使用 maven 參數
+
+```{r eval=FALSE}
+mvn test -Dcucumber.filter.tags="@alarm and @HarshDriving"
+```
+
+第二個方法：設定成環境變數
+
+```{r eval=FALSE}
+# Linux / OS X:
+CUCUMBER_FILTER_TAGS="@alarm and @HarshDriving" mvn test
+
+# Windows:
+set CUCUMBER_FILTER_TAGS="@alarm and @HarshDriving"
+mvn test
+```
+
+第三個方法：直接在 RunCucumberTest.java 宣告
+
+```{r eval=FALSE}
+@CucumberOptions(tags = "@alarm and @HarshDriving")
+public class RunCucumberTest {}
+```
+
+你也可以執行不包含特定標籤的程式
+
+```{r eval=FALSE}
+@CucumberOptions(tags = "not @HarshDriving")
+public class RunCucumberTest {}
+```
+
+以下舉個例子：
+
+```{r eval=FALSE}
+@AA @BB
+場景: 印數1
+  當 列印數字 1
+
+@AA @CC
+場景大綱: 印數2
+  當 列印數字 <num>
+  
+  @AA
+  例子:
+    |num|
+    |2  |
+  
+  @CC
+  例子:
+    |num|
+    |3  |
+  
+場景: 印數4
+  當 列印數字 4
+```
+
+* "\@AA"會印出數字 1, 2
+* "\@AA and \@BB" 會印出數字 1
+* "not \@AA and not \@CC" 會印出數字 4
+* "\@BB or \@CC" 會印出數字1, 3
+* "\@AA and (not \@BB)" 會印出數字 2
+
+### 取得 StepDefinitions 框架
+
+完成規格書寫作的時候，執行這個專案，java 會搜尋 StepDefinitions.java 內有沒有與 .feature 檔 相符的函式，如果沒有， console output 回直接給你：
+
+```{r eval=FALSE}
+@當("還沒登入時輸入帳號密碼按確定")
+public void 還沒登入時輸入帳號密碼按確定() {
+    // Write code here that turns the phrase above into concrete actions
+    throw new io.cucumber.java.PendingException();
+}
+
+@那麼("進入首頁")
+public void 進入首頁() {
+    // Write code here that turns the phrase above into concrete actions
+    throw new io.cucumber.java.PendingException();
+}
+```
+
+複製這些函式到 StepDefinitions.java 的主函式內，並且 import 那些英文/繁體中文的關鍵字
+
+有了 StepDefinition 的程式框架，接下來就是實作每個函式的內容
+
+### JUnit 套件使用 assert 名稱開頭方法驗證測試條件
+
+Assert 是 JUnit 中用來判定結果是否符合開發者預期的API，其中包含比較常用的API有
+
+* assertEquals([String message,] 基本型別 expected, 基本型別 actual) / 檢查兩者是否相同，如果是物件比較只看 value (Call by value)
+* assertNotEquals([String message,] Object expected, Object actual) / 檢查兩者是否不相同
+* assertSame([String message,] Object expected, Object actual) / 檢查兩者是否相同，會多看是否只到相同記憶體位置 (Call by reference)
+* assertFalse([String message,] boolean condition) / 是否為false
+* assertTrue([String message,] boolean condition) / 是否為true
+* assertNull([String message,] Object object) / 是否為 null
+* assertNotNull([String message,] Object object) / 是否不是 null
+
+以上 message 是選擇性的輸入，如果驗證條件錯誤，主要錯誤訊息就會改為顯示 message，還是會顯示錯誤細節，這邊只列舉 assert 開頭常用的 function，雖然一般情況下 java 字串值相同的判斷方法是「字串1.equals(字串2)」，但測試仍可使用「assertEquals(字串1, 字串2)」的方法。當這些 assert 函數驗證錯誤時，會回傳 AssertionError 並停止目前場景然後繼續執行下一個場景
+
+### 以 java 語言使用 selenium 操作瀏覽器 {.tabset .tabset-fade .tabset-pills}
+
+本傑解釋程式架構與瀏覽器操作程式
+
+#### 建議採用結構
+
+在 src/test/java 內新增二個 Package，一個稱作 common，用來存放函式共享的瀏覽器和資料；另一個稱作 seleniumPages，用來實作使用者對網頁的操作，不同頁面操作存放於不同的 .java 檔，而不是直接將所有操作寫在 StapDefinitions.java 內，這樣可以增加程式可讀性、重複利用函式、同時降低 debug 難度
+
+所以你的專案結構大致長這樣：
+
+```{r eval=FALSE}
+--pom.xml // 決定程式主架構、 .jar 檔和編譯方式
+--src
+  --test
+    --java
+      --專案名稱
+        --common
+          --MyDriver.java // 共享的瀏覽器和資料
+        --seleniumPages // 存放所有瀏覽器實作程式
+        --專案名稱
+          --RunCucumberTest.java // 用來執行專案
+          --StepDefinitions.java // 用來實作 .feature 的 step
+    --resources
+      --專案名稱 // 存放 .feature 的地方
+--target // 通常用來存放執行檔和測試報告
+```
+
+selenium 程式細節下一節開始解釋
+
+你的 MyDriver.java 如下，宣告 WebDriver 和一些可能需要的儲存資料:
+
+```{r eval=FALSE}
+import org.openqa.selenium.WebDriver;
+
+public class Mydriver {
+	public static WebDriver driver;
+  // 可能還有其他共用變數
+}
+```
+
+所有位於 seleniumPages 的程式碼形式如下，第三行 "extends Mydriver" 是關鍵，當所有 seleniumPages 主函式繼承同一個物件的時候，就算被外來的 StepDefinitions.java 呼叫用來新增物件，它們的操作還是會在同一個瀏覽器畫面上進行
+
+```{r eval=FALSE}
+import 專案名稱.common.Mydriver;
+// 以及一些 selenium 函式
+public class 主函式名稱 extends Mydriver{
+  	public void 方法一() {
+  	  // 實作方法一
+  	}
+    public void 方法二(可能有參數) {
+      // 實作方法二
+    }
+    ...
+}
+```
+
+StepDefinitions.java 大概長這樣，呼叫需要的 seleniumPages 內的方法來實作 .feature 的 step:
+
+```{r eval=FALSE}
+import io.cucumber.java.zh_tw.假如;
+...
+import 專案名稱.seleniumPages.自訂函數1;
+...
+public class StepDefinitions {
+  	自訂函數1 物件1 = new 自訂函數1();
+  	...
+  	@關鍵字("一句 feature step")
+	  public void 一句_feature_step() {
+	    物件1.方法一();
+	  }
+	  ...
+}
+```
+
+#### 瀏覽器基本操作
+
+```{r eval=FALSE}
+// 設定 webdriver 位置
+System.setProperty("webdriver.chrome.driver", "chromedriver位置");
+
+// 之後就能啟動
+driver = new ChromeDriver();
+
+// 視窗最大化
+driver.manage().window().maximize();
+
+// 前往網址
+driver.get("網址"); 
+driver.navigate().to("網址"); // 或是這樣
+
+// 到下一頁
+driver.navigate().forward();
+
+// 回上一頁
+driver.navigate().back();
+
+// 重新整理網頁
+driver.navigate().refresh();
+
+// 關閉瀏覽器
+driver.quit(); 
+
+// 關閉目前分頁
+driver.close(); 
+
+// 獲得目前網址字串
+getCurrentUrl();
+
+// 獲得目前網頁原始碼
+getPageSource();
+
+// 獲得目前網頁標題
+getTitle();
+
+// 回到本頁預設網頁框架
+driver.switchTo().defaultContent();
+
+// 直接按下警告視窗的"確定"
+driver.switchTo().alert().accept();
+```
+
+#### 取得物件
+
+```{r eval=FALSE}
+// 從 webdriver 搜尋一個符合條件的物件，或是眾多符合條件的第一個物件
+WebElement myElement = driver.findElement(By.方法(條件));
+
+// 從 webElement 搜尋一個符合條件的子物件，或是眾多符合條件的第一個子物件
+WebElement mySubElement = myElement.findElement(By.方法(條件));
+
+// 從 webdriver 搜尋所有符合條件的物件清單
+List<WebElement> myElementList = driver.findElements(By.方法(條件));
+
+// 從 webElement 搜尋所有符合條件的子物件清單
+List<WebElement> mySubElementList = myElement.findElements(By.方法(條件));
+
+// 你也可以疊加使用搜尋:
+List<WebElement> myElementList = driver.findElement(By.方法一(條件一)).findElements(By.方法二(條件二)); 
+```
+
+以下提供"條件"說明，在網頁上按右鍵然後檢查網頁原始碼．在這裡，網站的每個物件都是用標籤顯示，根據欲選擇物件的特性來決定選擇方式，以 id 和 name 特性抓取物件最快最簡單也最可靠，css 和 xpath 則是建議先看說明再使用
+
+|程式形式            |條件形式   |適用內容             |
+|--------------------|-----------|---------------------|
+|By.className("a")   |class 屬性|\<? class="a">...\</?>|
+|By.cssSelector("a > b")|css 條件|\<a>\<b>...\</b>\</a>|
+|By.id("a")          |id 屬性    |\<? id="a">...\</?>  |
+|By.linkText("b")    |超連結文字 |\<a>b\</a>           |
+|By.name("a")        |name 屬性  |\<? name="a">\</?>   |
+|By.partialLinkText("b")|一部份超連結文字|\<a>abc\</a> |
+|By.tagName("a")     |標籤名稱   |\<a>...\</a>         |
+|By.xpath("a")       |xpath 條件 |                     |
+
+#### 滑鼠操作
+
+```{r eval=FALSE}
+// 先用瀏覽器建立 Actions 物件
+Actions ac = new Actions(driver); 
+
+// 定義接下來的一連串動作，可以組合
+ac.doubleClick(element); // 按兩次左鍵
+ac.clickAndHold(); // 按左鍵不放
+ac.dragAndDrop(Sourcelocator, Destinationlocator); // 從物件一按左鍵，直線移動至物件二，然後放開
+ac.moveToElement(element); // 滑鼠移動至物件中央，如果看不到物件，捲動瀏覽器
+
+// 動作定義完成後，執行動作
+ac.build().perform();
+```
+
+#### 物件操作
+
+```{r eval=FALSE}
+// 傳送文字或鍵盤指令至物件，input 物件最常用，也可輸入檔案路徑來上傳檔案
+element.sendKeys(key);
+
+// 在物件中央點擊左鍵
+element.click();
+
+// 清空物件輸入值，input 物件最常用
+element.clear();
+
+// 獲得物件內的文字字串
+element.getText();
+
+// 獲得物件標籤名稱
+element.getTagName();
+
+// 獲得物件 css 值
+element.getCssValue();
+
+// 獲得物件 id 屬性，也可獲得其他標籤屬性
+element.getAttribute("id");
+
+// 獲得物件大小，可加入 .width()或 .height()方法來獲得長與寬
+element.getSize(); 
+
+// 物件是否顯示於畫面上
+element.isDisplayed();
+
+// 選項是否已選取，適用於選單、打勾或單選
+element.isSelected();
+
+// 獲得物件目前相對於瀏覽器左上方位置
+element.getLocation();
+```
+
+key 可以是字串或是鍵盤指令，鍵盤指令形如 Keys.ENTER, Keys.TAB 等等
+
+如果是輸入資料，盡量輸入含有特殊字元或是非本土字元，用意是測試這些文字內容不會導致網頁產生無法預期或是不合理的狀態(例如在數字資料存入英文字)，也可以測試網站對於這些不合理的字元是否有應對機制(例如數字資料內的英文字會被網頁警告)
+
+#### 等待選項
+
+```{r eval=FALSE}
+// 一般的程式暫停，以毫秒為單位
+Thread.sleep(5000)
+
+// 等待元素存在
+driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+// 等待頁面加載完成
+driver.manage().timeouts().pageLoadTimeout(40, TimeUnit.SECONDS);
+
+// 動態等待，先宣告 WebDriverWait 物件
+WebDriverWait wait = new WebDriverWait(driver,30);
+
+// 再宣告結束等待的條件
+wait.until(ExpectedConditions.多選一)
+
+// 以下為結束等待條件的幾個例子(ExpectedConditions 的方法)
+// 條件不再存在時
+not(ExpectedConditions.多選一)
+
+// 警告視窗出現時
+alertIsPresent()
+
+// 可以左鍵點擊物件時
+elementToBeClickable(By )
+
+// 選單物件已選擇時
+elementToBeSelected(By )
+
+// 物件轉為不可見時
+invisibilityOfElementLocated(By )
+
+// 網頁框架存在時，注意此方法執行後會直接切換
+frameToBeAvaliableAndSwitchToIt()
+
+// 網頁可以找到該物件時
+presenceOfElementLocated()
+
+// 物件內出現指定文字時
+textToBePresentInElement()
+
+// 網頁標題符合字串時
+titleIs(Str )
+
+// 網頁標題包含字串時
+titleContains(Str )
+
+// 物件可見時
+visibilityOfElementLocated(By )
+
+// 網址符合字串時
+urlToBe(String url)
+```
+
+顯式等待只會檢查條件是否能被執行，並不會真的執行，因為顯式等待是檢查條件是否成立，所以針對執行不穩定的誠實相對有效，同時能降低程式運行時間，若等待時間設定太短導致等待條件沒有成立，就會回傳錯誤訊息
+
+#### 選單的應對方法
+
+```{r eval=FALSE}
+// Select 物件的建構子 element 必須為 select 標籤
+Select objSelect = new Select(element);
+
+// 根據顯示文字選擇選項
+objSelect.selectByVisibleText(“text”);
+
+// 根據排序選擇選項
+objSelect.selectByIndex(int);
+
+// 根據選項值選擇選項
+objSelect.selectByValue(“text”);
+
+// 獲得所有選項物件
+List<WebElement> list = objSelect.getOptions();
+
+// 取消選擇所有選項，僅限於複選
+objSelect.deselectAll();
+
+// 選單是否可複選
+boolean tf = objSelect.isMultiple(); 
+```
+
+#### coockie 處理
+
+其中一個判斷是否已登入的方法就是查看某特定 cookie 是否出現，如果特定 cookie 沒有出現，就表示尚未登入，要進行登入操作
+
+```{r eval=FALSE}
+// 取得所有 cookies
+driver.manage().getCookies();
+
+// 取得特定的 cookies
+driver.manage().getCookieNamed(arg0);
+
+// 刪除所有 cookies
+driver.manage().deleteAllCookies();
+```
+
+#### 網頁框架的應對方法
+
+除了 frameToBeAvaliableAndSwitchToIt() 會自動切換至該框架外，也可以用手動切換的方法
+
+```{r eval=FALSE}
+// 切換至第一個框架
+driver.switchTo().frame(0)
+
+// 切換至指定框架
+driver.switchTo.frame(int  frame number)
+driver.switchTo.frame(string  frameNameOrId)
+driver.switchTo.frame(WebElement  frameElement)
+
+// 切換至母框架
+driver.switchTo().parentFrame
+
+// 切換至預設框架
+driver.switchTo().defaultContent 
+```
+
+#### 決定下載檔案位置
+
+在一開始開啟瀏覽器時就要決定
+
+```{r eval=FALSE}
+Map<String, Object> prefs = new HashMap<String, Object>();
+
+// 定義下載資料夾於專案內的 resource 資料夾
+prefs.put("download.default_directory",System.getProperty("user.dir") + File.separator + "resources");   
+ChromeOptions options = new ChromeOptions();
+options.setExperimentalOption("prefs", prefs);
+driver = new ChromeDriver(options);
+```
+
+#### 使用 javaScript 語言操作瀏覽器
+
+熟稔 javascript 操作瀏覽器的話可以參考
+
+```{r eval=FALSE}
+// 先建立物件
+JavascriptExecutor javascriptExecutor = (JavascriptExecutor) driver;
+
+// 在物件內輸入文字
+javascriptExecutor.executeScript("arguments[0].value='keyword';", searchInput);
+
+// 捲動瀏覽器或文字方塊
+js.executeScript("window.scrollBy(0,350)", "");
+js.executeScript("window.scrollBy(0,-350)", "");
+js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+js.executeScript("arguments[0].scrollIntoView();", Element);
+```
+
+### 產出測試報告
+
+預設支援產出的測試報告形式包含 pretty(.txt), html, json, junit(.xml)等，其他形式可透過額外套件來產生，其中 json 格式可以用來在 jenkins 頁面上產生精美測試報告頁面、 junit 可以用來產生與 jira 連線的 issue，在 RunCucumberTest.java 內宣告報告產生的位置和設定即可
+
+```{r eval=FALSE}
+@RunWith(Cucumber.class)
+@CucumberOptions(monochrome = true,
+	publish = true,
+	plugin = {"pretty:target/cucumber-pretty.txt", 
+			"html:target/cucumber-html-report.html", 
+			"json:target/cucumber-json-report.json", 
+			"junit:target/cucumber-results.xml"}
+)
+public class RunCucumberTest {
+
+}
+```
+
+monochrome 選項是為了讓 pretty 報告不會產生亂碼，publish 宣告要產出實體報告
+
+## 範例：核心警報
+
+本範例共含有四個 package，作用如下：
+
+* azureAndJDBC 內含有連線至 azureQueue, azureTable 以及 MSSQL(JDBC) 的程式
+* common 內含有執行測試所有需要的共用變數
+* FMSRegressionTest 含有主程式
+  - RunCucumberTest.java 可以決定測試報告的產出，用標籤決定要執行的一部份測試，也是執行整個專案的程式
+  - StepDefinitions.java 含有所有 .feature 檔的 Step 定義，以呼叫其它 Package 內的物件方法進行實作
+* seleniumPages 含有所有與瀏覽器操作相關的程式碼
+
+圖\@ref(fig:AlarmSt)是核心警報自動化測試流程圖：
+
+```{r echo=FALSE, include=FALSE}
+# install.packages("DiagrammeR")
+library(DiagrammeR)
+
+grViz(diagram = "digraph flowchart {
+  node [shape = diamond]
+  accessory [label = '配件需求']
+
+  node [shape = rectangle]
+  login [label = '網頁登入']
+  addAccessory [label = '新增配件']
+  addCar [label = '新增測試車']
+  addAlarm [label = '新增警報']
+  newPage [label = '新警報日誌分頁\n關閉警告視窗']
+  readRawQueue [label = '讀取警報 queue 模板']
+  readJDBC [label = '連線MSSQL']
+  
+  node [shape = parallelogram]
+  rawQueue
+  JDBC [label = 'carID\ndeviceID\nalarmID\nalarmType']
+  
+  node [shape = rectangle, style = rounded]
+  start [label = '測試開始']
+  end [label = '測試結束']
+  
+  subgraph{
+  rank = same; addAccessory; addCar;
+  addAccessory -> addCar
+  }
+  
+  subgraph{
+  rank = same; readRawQueue; rawQueue;
+  rawQueue -> readRawQueue []
+  }
+  
+  subgraph{
+  rank = same; readJDBC; JDBC;
+  JDBC -> readJDBC
+  }
+  
+  start -> login -> accessory;
+  addCar -> addAlarm -> newPage -> readRawQueue -> readJDBC -> end;
+  accessory -> addAccessory [label = '是', tailport = 'w'];
+  accessory -> addCar [label = '否', tailport = 'e']
+}
+  ")
+```
+
+```{r AlarmSt, fig.width=3, fig.cap="核心警報架構", echo = FALSE}
+knitr::include_graphics("/Users/teuton/Documents/R Project/RSelenium/images/核心警報架構.png")
+```
+
+本測試案例使用車號 357364080043986 和 013795001099134 ，以及teuton自動化測試圓形區域,  teuton自動化測試多邊形區域，請不要刪除或修改
+
+危險駕駛、溫度、門位和車道偏移需要另外新增配件，在新增測試車輛時會將新增的配件裝在對應 DBPort 上
+
+危險駕駛警報因為觸發等待時間過長，目前尚未實作 DVR 錄影 Queue 的實作，只有先抓取最新 Queue 而沒有後續判斷動作，但只需確認 Queue 的車號、時間和警報條件正確即可
+
+怠速、門位和區域共享觸發頻率與次數設定，所以它們對於這部分的實作方法相同，但是重新設定時無法直接更改值，必須將選項重新關閉與開啟
+
+只有溫度警報規則是套用在配件上，其餘皆套用在測試車上，另外由於溫度警報執行時間過長，目前沒有確認其運作結果
+
+離線警報分成 12 小時與 24 小時兩種，前置作業與檢查作業的標籤是分開的，請注意執行此警報的前置作業後，會因為測試車號已經存在而無法再新增，導致其他警報會在新增測試車時會出現錯誤訊息。在測試其它警報前，請先確定此警報沒有進入測試階段，離線警報的測試，在新增警報後傳送一個車機資料，然後將警報相關的訊息存在文字檔內，直到驗證警報時讀取此文字檔並且搜尋網頁日誌與資料庫驗證警報，然後將文字檔、警報以及測試車刪除
+
+有些警報沒有結束警報後的資料，或是沒有額外資訊，例如危險駕駛警報，就會在觸發警報時一併補上
+
+只有危險駕駛警報在決定是否錄影時決定 recordVideo 變數，其餘警報皆維持空字串
+
+步驟與變數相關會用相同顏色外框標記
+
+startTime 和 endTime 參數用來決定搜尋警報時間的範圍
+
+由於同時觸發多筆警報會導致無法保證觸發先後順序，驗證警報方法會使用沒有次序的 set 而非一般有次序的 list，由 isMultipleTrigger 狀態判斷使用哪種形式判斷
+
+# bug 定義、追蹤以及報告
+
+## Bug 是什麼
+
+Bug 是電腦或程序中存在的任何一種破壞正常運行能力的問題、錯誤、或隱藏的功能缺陷、瑕疵
+
+bug 一般分為四個嚴重等級(可在 jira 註記)：
+
+* 致命的(fatal)：造成系統或應用程式 crash、死機，或造成數據丟失、主要功能組完全喪失等，測試因此無法繼續進行
+* 嚴重的(Critical)：功能或特性沒有實現，主要功能喪失
+* 一般的(major)：不影響系統基本使用，但沒有很好地實現功能
+* 微小的(minor)：一些小問題，對功能幾乎沒影響，像是錯字和小型排版不對齊
+
+有時會提供「建議」等級來處理測試人員所提出的建議或質疑，一般而言，越嚴重的 bug 越優先處理
+
+Bug 狀態可以反映 bug 處於一個什麼樣的狀態，便於跟蹤(可在 jira 註記)，以下為一些狀態：
+
+* 激活狀態(Active, Open)：問題還沒有解決，測試人員新發的 bug，或驗證後 bug 仍存在
+* 已修正狀態(Fixed, Resolved)：**開發人員**針對 bug 修改程式，認為已解決問題或通過單元測試
+* 關閉或非激活狀態(Close, Inactive)：測試人員驗證 bug 已修正後，確認其不存在後狀態
+* Hold狀態：Bug 目前無法解決或是第三方引起
+* differed狀態：bug 暫時不需解決或下一版解決更徹底
+
+## bug 以及其他需求在 jira 上的追蹤方式
+
+若測試人員發現了 bug，以敏捷開發而言，直接面對面向開發人員說明是最理想的，若要紀錄與跟蹤 bug 處理進度，可以透過 jira 建立 issue 來描述，這裡 issue 可以是 bug、功能請求、或是任何想要追蹤的工作，以下是 jira issue 可以填寫的一些項目：
+
+* issue 種類：以下是事先定義好的 issue 種類，你可以新增更多
+  - Bug：阻礙產品功能的部分
+  - Defect
+  - Improvement：現有工作功能的優化或強化
+  - Presales
+  - REQ
+  - Service-desk
+  - Task：一個需要完成的工作
+* 大綱：簡明扼要的對進行一個概述，讓人看了就知道出了什麼問題
+* issue 描述：讓研發人員清晰這是一個什麼問題，看了能夠自己復現的程度，包含測試配置、測試環境、測試步驟、預期結果和實際結果
+* issue 隸屬的專案
+* 專案內跟此 issue 有關的部分
+* 被此 issue 影響的專案版本
+* 解決此 issue 的專案版本
+* issue 發生的環境
+* 修理優先序：issue 有個優先序等級來代表其重要性，以下為目前定義好的優先序，你可以新增更多
+  - ?
+  - 0
+  - 1：阻擋開發和/或測試，產品無法運作
+  - 2：當機、資料遺失、嚴重記憶體外洩
+  - 3：主要功能損壞
+  - 4：次等功能損壞，或其他可以輕易避開的問題
+  - 5：不影響功能的問題，像是錯字或是文字不對齊
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - S
+  - None
+  - 100：已解決
+* 指派要處理此工作的開發者
+* 回報此 issue 的使用者
+* issue 目前的狀態：每個 issue 都有狀態來代表其階段，在預設流程中，issue 從 Open, progressing 到 in progress, resolved, closed，其他流程可能會有其他狀態選項
+  - Returned：此 issue 開放，可以指派給工程師
+  - In progress：被指派者正在處理此 issue
+  - Reopened：這個 issue 曾經是 Resolved，但解決狀態的回報是錯誤的，issue 下一階段是 Assigned 或是 Resolved
+  - Resolved：決定了解決狀態，正等待通報者驗證，issue 下一階段是 Reopened 或是 Closed
+  - Released：此 issue 認定為已完結且解決狀態是正確的，closed issued 可能會變成 reopened
+  - Assigned：這個 issue 才剛被指派至某人並準備進行，這個狀態的 issue 可以指派給其他人，或是直接解決而變成 Resolved 狀態
+  - InQA
+  - Validate
+  - Evaluating
+  - Passed
+  - Failed
+  - Pending
+  - Rejected
+  - Debugging
+  - Deploy
+* 紀錄所有改變的歷史紀錄
+* 使用者添加的評論
+* issue 是否已解決：一個 issue 可以用許多解決狀態描述，fixed 只是其中一個，以下是預先定義的解決狀態，你可以新增更多：
+  - Unresolved：尚未解決(預設值)
+  - Fixed：針對此 issue 的修復已檢查並測試 
+  - Won't fix：描述的問題是無法解決的議題
+  - Duplicate：此問題與某個現有 issue 重複
+  - Incomplete：沒有完整描述問題
+  - Cannot reproduce：嘗試重現這個 issue 失敗，或是資訊不足而無法重現這個 issue，解讀程式碼無法得知為什麼會發生這種行為， 如果以後有更多資訊，請 reopen 此 issue
+  - imited：系統配置限制
+
+# 測試報告
+
+以瀑布式開發而言，測試報告是項目測試結束之後，對項目測試過程的總結，對測試的數據進行統計，對項目的測試質量進行客觀評價的文檔，測試報告的閱讀對象可是是產品，開發，測試部成員，是一個項目是否能夠結束的重要參考文件，盡可能以**圖文結合**方式展現出來
+    
+以敏捷開發流程而言，測試報告可以以網頁的形式釋出在內部的 web 伺服器上，並且標記比較嚴重的 bug 讓團隊清楚看到，一有變動就直接修改
+
+## 測試報告內容
+
+* 概述：包括本次測試的目的，測試的背景介紹
+* 測試環境：包括測試軟硬體環境及配置，最好提供測試環境的網路拓撲圖
+* 測試的一些參考資料
+* 測試參與人員，以及投入的時間情況說明
+* 測試的進度情況：包括計劃進度和實際進度
+* 測試情況介紹：包括測試的內容項說明
+* 缺陷的統計和分析：包括迭代次數，缺陷的分佈情況，缺陷的覆蓋情況，缺陷的發展趨勢等
+* 本次測試的結論：明確的結論建立在事實、資料上
+* 測試人員就本次測試客觀的一些建議

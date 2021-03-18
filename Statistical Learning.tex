@@ -1,0 +1,613 @@
+\documentclass{report} % 這樣小節會根據章節調整
+\title{Statistic Concept}
+\author{teuton%
+\footnote{Still learning}%
+}
+\date{\today}
+%\usepackage{CJKutf8}% 這是第一版用的中文套件，用pdflatex編譯
+%----------這是第二版字型套件，用xelatex編譯
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont[Mapping=tex-text]{Times New Roman}
+\setCJKmainfont{楷體-繁}
+%----------
+\usepackage{amsmath} % 用於split數學等式操作
+\usepackage{color} % 用於調整文字顏色
+\usepackage{graphicx} % 用於匯入圖片
+\usepackage{makeidx} % 用於創建索引
+\graphicspath{ {./image/}} % 宣告圖片位置
+%\usepackage{hyperref} % 用於超連結
+\usepackage[breaklinks, colorlinks, linkcolor=blue, citecolor=green, urlcolor=red]{hyperref} % 用於創立超連結與書籤
+\makeindex % 建立索引
+\begin{document}
+\maketitle % 建立封面資料
+%\begin{CJK*}{UTF8}{bkai}% 第一版中文套件設定
+\tableofcontents % 建立目錄
+\chapter{基本統計介紹}
+  \section{什麼是統計學習?}
+    通常使用$X$代表輸入變數，如果有多個變數則用$X_1,X_2...$代表，用$Y$代表輸出
+      變數，假設$X = (X_1, X_2, \ldots, X_p)$代表一些已決定好的輸入變數，通
+      常可以用一個未知但固定的函數$f$和隨機誤差項$\epsilon$表示:
+    \begin{equation}
+      Y = f(X) + \epsilon
+    \end{equation}
+    \subsection{為何估計f?}
+      \subsubsection{預測}
+        假設你有一個預測函數$\hat{Y} = \hat{f}(X)$而且預測函數和預測因子是固
+          定的，那$Y$的差平方的期望值就是:
+        \begin{equation}
+          \begin{split}
+              E(Y - \hat{Y}) ^ 2 & = E[f(X) + \epsilon - \hat{f}(X)]
+                                     ^ 2\\
+                                 & = [f(X) - \hat{f}(X)] ^ 2 +
+                                     Var(\epsilon)
+          \end{split}
+        \end{equation}
+        其中$[f(X) - \hat{f}(X)] ^ 2$是可以調整的，$Var(\epsilon)$是自然
+          誤差的變異數，是一個常數，訓練模型主要是為了降低前者以達到更好的預測結
+          果
+      \subsubsection{推理}
+        除了預測結果，還需要對資料進行推理:
+        \begin{itemize}
+          \item 哪些變數會影響結果?
+          \item 結果與各個變數的關係是什麼?
+          \item 輸出與輸入的關係可以用線型函數描述嗎?還是說兩者關係更複雜?
+        \end{itemize}
+    \subsection{如何估計f?}
+      {\bf 訓練組資料}\index{訓練組資料}\marginpar{訓練組資料}顧名思義是為了
+        訓練模組而使用的資料，使模組產生一個接近未知函數$f$的函數$\hat{f}$，如
+        果用$x_{ij}$表示第$i$筆資料中變數$X_j$的值，$y_i$則代表第$i$筆資料輸
+        出結果，整個資料可以寫成一個矩陣:
+      \[
+        \left(
+          \begin{array}{cccc}
+            x_{11} & \cdots & x_{1p} & y_1 \\
+            x_{21} & \cdots & x_{2p} & y_2 \\
+            \vdots & \ddots & \vdots & \vdots \\
+            x_{n1} & \cdots & x_{np} & y_n
+          \end{array}
+        \right)
+      \]
+      模型有兩種方法取得預測函數$\hat{f}$:{\bf 參數化方法}\index{參數化方
+        法}\marginpar{參數化方法}以及{\bf 非參數化方法}\index{非參數化方
+        法}\marginpar{非參數化方法}
+      \subsubsection{參數化方法}
+        分成二步進行:
+        \begin{enumerate}
+          \item[1] 假設函數的樣式或形狀，例如線性:
+            \begin{equation}				
+              f(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \cdots +
+                \beta_pX_p
+            \end{equation}
+            下一章會詳細介紹本方法，只要知道$p + 1$個變數就可以建構此線性模
+              型，當然一開始的預測不見得是線性，有時候其他形狀可以的到更好的
+              預測結果
+          \item 接著將訓練組資料代入等式，在這個例子裡，目標是找到適當的參數
+            使得
+            \begin{equation}				
+              Y \approx \beta_0 + \beta_1X_1 + \beta_2X_2 + \cdots
+                + \beta_pX_p
+            \end{equation}
+            這裡最常見的作法是最小平方法
+        \end{enumerate}
+        注意誤差值過低可能導致{\bf 過度套入}\index{過度套入}\marginpar{過度
+          套入}，進而影響實際表現 \\
+      \subsubsection{非參數化方法}
+        在圖形不要太粗糙或搖晃、但又能盡量貼和訓練組資料的前提下，估計出$f$的大
+          致圖形，或使用數學函數逼近
+    \subsection{預測精度與模型可解釋性之間的權衡}
+      通常兩者不可兼得
+    \subsection{監督式學習與非監督式學習}
+      {\bf 監督式學習}\index{監督式學習}\marginpar{監督式學習}就像是做選擇題
+        練習，每筆訓練組資料的輸出都有對應值(標準答案)，模型的目標是使預測結果盡
+        量逼近真實輸出結果(也就是遇上問題，回答要盡量正確)，例如氣溫預測；{\bf
+        非監督式學習}\index{非監督式學習}\marginpar{非監督式學習}的訓練組資
+        料沒有輸出值(沒有正確答案)，模型要自行從訓練組資料中歸納出規則，進而輸
+        出，例如鳶尾花分類
+    \subsection{回歸與分類問題}
+  \section{評估模型準確性}
+    \subsection{測量擬合質量}
+      用來估計模型效能最常見的數值就是{\bf 均方誤差(MSE)}\index{均方誤
+        差(MSE)}\marginpar{均方誤差(MSE)} :
+      \begin{equation}
+        MSE = \frac{1}{n}\sum_{i = 1} ^ {n}(y_i - \hat{f}(x_i)) ^ 2
+      \end{equation}
+      其中$\hat{f}(x_i)$指的是第$i$筆資料的預測輸出，如果$MSE$越小，表示模型
+        預測結果與真實輸出越接近，MSE分成兩種:訓練MSE和測試MSE，分別是使用訓練
+        組資料和測試組資料所得到的MSE，降低訓練MSE相對容易，由於模型不知道測試
+        組資料的結果，測試MSE難以降低
+    \subsection{偏差-變異折衷}
+    \subsection{分類設定}
+      如果預測的不是數字，而是某個標籤(例如晴天雨天、蘋果番茄...)，則改用{\bf
+        錯誤率}\index{錯誤率}\marginpar{錯誤率}來評估模型:
+      \begin{equation}
+        \frac{1}{n}\sum_{i = 1} ^ {n}I(y_i \neq \hat{y}_i)
+      \end{equation}
+      這裡$\hat{y}_i$指的是第$i$筆資料的預測輸出標籤，而$I(y_i \neq
+        \hat{y}_i)$的定義是:
+      \[
+        I(y_i \neq \hat{y}_i) =
+        \left\{
+          \begin{array}{cc}
+            1, & \mbox{如果$y_i \neq \hat{y}_i$，也就是預測結果錯誤} \\
+            0, & \mbox{如果$y_i = \hat{y}_i$，也就是預測結果正確}
+          \end{array}
+        \right.
+      \]
+      \subsubsection{貝氏分類}
+        {\bf 貝氏分類}\index{貝氏分類}\marginpar{貝氏分類}是建立在條件機率
+          上，觀察特定原始資料$x_0 $然後計算每個類別機率:
+        \begin{equation}
+          Pr(Y = j | X = x_0)
+        \end{equation}
+        選出適當的輸出類別$j$使上面等式有最大值，對每筆資料操作，就能把原始資料
+          分類成各種區域，每一種對應到一個最有可能的輸出類別，由這方法可以得到最
+          低的錯誤率，稱為{\bf 貝氏錯誤率}\index{貝氏錯誤率}\marginpar{貝氏
+          錯誤率}，因為每筆資料$X = x_0$的錯誤率是$1 - \max_j Pr(Y = j|X
+          = x_0)$，貝氏錯誤率的公式為:
+        \begin{equation}
+          1 - E(\max_j Pr(Y = j | X = x_0))
+        \end{equation}
+      \subsubsection{K-近鄰分類}
+        但是在現實的資料中無從得知條件隨機分布，貝式分類法不可行，有些方法嘗試估
+          計條件隨機分布，{\bf K-近鄰分類}\index{K-近鄰分類}\marginpar
+          {K-近鄰分類}就是其中一個，給定一正整數$K$和一觀察資料$x_0$，選擇
+          離$x_0$最近的$K$個觀察資料，這些資料形成一個集合，以$\mathcal{N}
+          _0$表示，這樣對每種輸出結果$j$的條件機率是:
+        \begin{equation}
+          Pr(Y = j | X = x_0) = \frac{1}{K}\sum_{i \in
+            {\mathcal{N}_0}}I(y_i = j)
+        \end{equation}
+        有這個就能套用貝氏分類法，$K$值太高或太低都不好，找到一個適當的$K$值可
+          以最高程度的降低測試誤差
+\chapter{線性迴歸}
+  \section{簡單線性迴歸}
+    對於{\bf 簡單線性迴歸}\index{簡單線性迴歸}\marginpar{簡單線性迴歸}，輸入
+      和輸出各只有一個:
+    \begin{equation}
+      Y \approx \beta_0 + \beta_1X
+    \end{equation}
+    $\beta_0$稱為{\bf 截距}\index{截距}\marginpar{截距}，$\beta_1$稱
+      為{\bf 斜率}\index{斜率}\marginpar{斜率}，這些需要決定的數(在本例，二
+      個)統稱為{\bf 係數}\index{係數}\marginpar{係數}或{\bf 數}\index{參
+      數}\marginpar{參數}，藉由訓練資料可以得到這些係數，進而估計資料:
+    \begin{equation}
+      \hat{y} = \hat{\beta_0} + \hat{\beta_1}x
+    \end{equation}
+    \subsection{估計係數}
+      為了使模型梗準確，最常見的方法是降低誤差的{\bf 最小平方}\index{最小平
+        方}\marginpar{最小平方}，$e_i = y_i - \hat{y}_i$稱為第$i$筆{\bf
+        殘差}\index{殘差}\marginpar{殘差}，由此可以定義{\bf 殘差平方
+        和(RSS)}\index{殘差平方和(RSS)}\marginpar{殘差平方和(RSS)}:
+      \[
+        RSS = e_1 ^ 2 + e_2 ^ 2 + \cdots + e_n ^ 2
+      \]
+      或，根據定義:
+      \begin{equation}
+        RSS = (y_1 - \hat{\beta_0} - \hat{\beta_1}x_1) ^ 2 + (y_2 -
+          \hat{\beta_0} - \hat{\beta_1}x_2) ^ 2 + \cdots + (y_n -
+          \hat{\beta_0} - \hat{\beta_1}x_n) ^ 2
+      \end{equation}
+      最小平方法選擇$\hat{\beta_0}$和$\hat{\beta_1}$使$RSS$最小，根據微積
+        分，係數的公式為:
+      \begin{equation}
+        \begin{split}
+          \hat{\beta_1} & = \frac{\sum_{i = 1} ^ {n}(x_i -
+            \bar{x})(y_i - \bar{y})}{\sum_{i = 1} ^ {n}(x_i -
+            \bar{x})} \\
+          \hat{\beta_0} & = \bar{y} - \hat{\beta_1}\bar{x}
+        \end{split}
+      \end{equation}
+      其中$\bar{y} = \frac{1}{n}{\sum_{i = 1} ^ {n}y_i}$以及$\bar{x} =
+        \frac{1}{n}\sum_{i = 1} ^ {n}x_i$，也就是取樣本平均
+    \subsection{評估係數估計的準確性}
+      如果變數間關係可用線性模型表達，可寫成{\bf 總體回歸線}\index{總體回歸
+        線}\marginpar{總體回歸線}的格式:
+	  \begin{equation}
+        Y = \beta_0 + \beta_1X + \epsilon
+      \end{equation}
+      自行由最小平方法定義出的直線稱為{\bf 最小平方線}\index{最小平方線}
+        \marginpar{最小平方線}，重複預測多次，真實平均數以$\mu$表示，不同資料
+        的平均數集合以$\hat{\mu}$表示，這樣就可以計算其{\bf 標準誤差}
+        \index{標準誤差}\marginpar{標準誤差}(以$SE(\hat{\mu})$表示):
+      \begin{equation}
+        Var(\hat{\mu}) = SE(\hat{\mu}) ^ 2 = \frac{\sigma ^ 2}{n}
+      \end{equation}
+      其中$\sigma$是$y_i$於隨機變數的標準偏差，同樣的操作可以對模型係數做:
+      \begin{equation}
+        \left.
+          \begin{array}{cc}
+            SE(\hat{\beta_0}) ^ 2 = \sigma ^ 2\left[\frac{1}{n} +
+              \frac{x ^ 2}{\sum_{i = 1} ^ {n}(x_i - \bar{x}) ^
+              2}\right], & SE(\hat{\beta_1}) ^ 2 = \frac{\sigma ^ 2}
+              {\sum_{i = 1} ^ {n}(x_i - \bar{x}) ^ 2}
+          \end{array}
+        \right.
+      \end{equation}
+      在這裡$\sigma ^ 2=Var(\epsilon)$，通常未知但可以從資料估計，$\sigma$
+        ，別名殘差標準誤差，可以用$RSE = \sqrt{RSS / (n - 2)}$公式估計，後
+        續會解說\\
+      標準誤差可用於估計{\bf 信心區間}\index{信心區間}\marginpar{信心區間}
+        ，例如$95\%$信心區間代表未知參數有$95\%$機率落在此區間範圍內，以線性迴
+        歸而言，$\beta_1$的$95\%$信心區間形式大約為:
+      \begin{equation}
+        \hat{\beta_1} \pm 2 \cdot SE(\hat{\beta_1})
+      \end{equation}
+      $\beta_0$的信心區間則是
+      \begin{equation}
+        \hat{\beta_0} \pm 2 \cdot SE(\hat{\beta_0})
+      \end{equation}
+      也可使用標準差對係數進行{\bf 假設檢驗}\index{假設檢驗}\marginpar{假
+        設檢驗}，最常見的假設檢驗包括{\bf 零假設}\index{零假設}\marginpar
+        {零假設}:
+      \begin{equation}
+        H_0 : There\;is\;no\;relationship\;between\;X\;and\;Y
+      \end{equation}
+      並且與{\bf 替代假設}\index{替代假設}\marginpar{替代假設}進行比較:
+      \begin{equation}
+        H_a : There\;is\;some\;relationship\;between\;X\;and\;Y
+      \end{equation}
+      以數學的語言描述，對應到假設:
+      \[
+        H_0 : \beta_1 = 0
+      \]
+      對比
+      \[
+        H_a : \beta \neq 0
+      \]
+      但$\beta_1$與$0$要"多靠近"才能確定$H_0$是對的?對此可以用{\bf t統計量}
+        \index{t統計量}\marginpar{t統計量}來估計，如果輸入與輸出沒有關係，這
+        個就會接近$t$分布，誤差$n - 2$級:
+      \begin{equation}
+        t = \frac{\hat{\beta}_1 - 0}{SE(\hat{\beta}_1)}
+      \end{equation}
+      {\bf p值}\index{p值}\marginpar{p值}計算$\beta_1 = 0$的機率，也就
+        是輸入與輸出沒有任何關係的機率，夠小的p值\\($5\%$或$1\%$)表示$H_0$是
+        錯的，也就是輸入與輸出有關係存在 \\
+      \begin{table}[htbp]
+        \caption{\label{tb:advertising}coefficients of the least
+          squares model for the regression}
+        \centering
+        \begin{tabular}{l|rrrr}
+          \hline
+            & Coefficient &  Std. error &  t-statistic & p-value
+          \tabularnewline
+          \hline
+          Intercept & 7.0325 & 0.4578 & 15.36 & $<$0.0001
+          \tabularnewline
+                 TV & 0.0475 & 0.0027 & 17.67 & $<$0.0001
+          \tabularnewline
+          \hline
+        \end{tabular}\\
+        (An increase of $\$1000$ in the TV advertising budget is
+          associated with an increase in sales by around 50 units)
+      \end{table}
+      In Table \ref{tb:advertising}, a small $p$-value for TV
+        indicates that we can reject the null hypothesis that
+        $\beta_1 = 0$, which allows us to conclude that there is a
+        relationship between TV and sales.
+    \subsection{評估模型準確度}
+      \subsubsection{殘差標準誤差}
+        由於$\epsilon$的存在，就算有真實線性模型，也無法完美預測每個結果，{\bf
+          殘差標準誤差(RSE)}\index{殘差標準誤差(RSE)}\marginpar{殘差標準誤
+          差(RSE)}，也就是$\epsilon$標準偏差的估計，定義為:
+        \begin{equation}
+          RSE = \sqrt{\frac{1}{n - 2}RSS} = \sqrt{\frac{1}{n -
+            2}\sum_{i = 1} ^ {n}(y_i - \hat{y}_i) ^ 2}
+        \end{equation}
+	  \subsubsection{$R ^ 2$統計量}
+        {\bf $R ^ 2$統計量}\index{$R ^ 2$統計量}\marginpar{$R ^ 2$統計
+          量}用來測量模型與資料的擬和度，由於這個值介於$0$到$1$之間，不會受到資
+          料值大小的影響，越接近$1$代表模型越能解釋資料:
+        \begin{equation}
+          R ^ 2 = \frac{TSS - RSS}{TSS} = 1 - \frac{RSS}{TSS}
+        \end{equation}
+        其中$TSS = \sum{(y_i - \bar{y}) ^ 2}$代表{\bf 總平方和}
+          \index{總平方和}\marginpar{總平方和}，也就是輸出的總變異數 \\
+        輸入與輸出的{\bf 相關係數}\index{相關係數}\marginpar{相關係數}定義
+          為:
+        \begin{equation}
+          r = Cor(X, Y) = \frac{\sum_{i = 1} ^ {n}(x_i - \bar{x}) (y_i - \bar{y})}{\sqrt{\sum_{i = 1} ^ {n}(x_i - \bar{x}) ^ 2}\sqrt{\sum_{i = 1} ^ {n}(y_i - \bar{y}) ^ 2}}
+        \end{equation}
+        在簡單線性迴歸的設置下，$R ^ 2 = r ^ 2$
+  \section{多重線性迴歸}
+    多重線性迴歸的模型形式為:
+    \begin{equation}
+      Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p
+        + \epsilon
+    \end{equation}
+    這裡$X_j$代表第$j$個輸入變數，$\beta_j$對應其係數
+    \subsection{估計迴歸係數}
+      與簡單線性迴歸類似，多重線性迴歸的預測為:
+      \begin{equation}
+        \hat{y} = \hat{\beta_0} + \hat{\beta_1} x_1 + \hat{\beta_2}
+         x_2 + \cdots + \hat{\beta_p} x_p
+      \end{equation}
+      一樣使用最小平方法預測係數，只是數量有$p$個:
+      \begin{equation}
+        \begin{split}
+          RSS & = \sum_{i = 1} ^ {n}(y_i - \hat{y}_i) ^ 2 \\
+              & = \sum_{i = 1} ^ {n}(y_i - \hat{\beta_0} -
+                \hat{\beta_1} x_{i1} - \hat{\beta_2} x_{i2} - \cdots - \hat{\beta_p} x_{ip}) ^ 2
+        \end{split}
+      \end{equation}
+      由於一次考慮多個輸入，數值可能會與簡單線性迴歸不同
+    \subsection{一些重要的問題}
+      \begin{enumerate}
+        \item {\bf 至少有一個輸入變數對預測輸出實用嗎?}\\
+          使用多變數的零假設:
+          \[
+            H_0:\beta_1 = \beta_2 = \cdots = \beta_p = 0
+          \]
+          與替代假設相比:
+          \[
+            H_a : at\;least\;one\;\beta_j\;is\;not\;zero
+          \]
+          這個假設檢驗可以由計算{\bf F統計量}\index{F統計量}\marginpar
+            {F統計量}來驗證(在$p$值相對小時也適用):
+          \begin{equation}
+            F = \frac{(TSS - RSS) / p}{RSS / (n - p - 1)}
+          \end{equation}
+          此處$TSS = \sum(y_i - \bar{y}) ^ 2$、$RSS = \sum(y_i -
+            \hat{y}) ^ 2$，這些定義和簡單線性迴歸時相同，如果線性模組假設是
+            對的，那可以證明:
+          \begin{equation}
+            E\{RSS / (n - p - 1)\} = \sigma ^ 2
+          \end{equation}
+          另外，如果$H_0$是真的:
+          \begin{equation}
+            E\{(TSS - RSS) / p\} = \sigma ^ 2
+          \end{equation}
+          也就是說，如果輸入變數與輸出結果關係不大，$F$會接近$1$，如果$H_a$
+            是真的，$F$會比$1$大，也就是至少有一個輸入與輸出有關係，但是要注
+            意$n$值對$F$可能會造成誤判，例如$n$值很大時，$H_0$為真可能只是
+            假象\\
+          有時候只想測試特定$q$個輸入變數，對應到的假設檢驗為:
+          \[
+            H_0:\beta_{p - q + 1} = \beta_{p - q + 2} = \cdots =
+              \beta_p = 0
+          \]
+          為了方便起見，把這$q$個輸入變數移到最後方、在不使用這$q$個輸入變數
+            的情況下做了第二個線性模型，並假設其殘差平方和為$RSS_0$，此時適
+            當的$F$統計量為:
+          \begin{equation}
+            F = \frac{(RSS_0 - RSS) / q}{RSS / (n - p - 1)}
+          \end{equation}
+        \item {\bf 對於解釋結果有幫助的輸入變數有多少?全部?一部份?} \\
+          決定哪些輸入變數用來計算輸出，以用單一模型呈現，這叫{\bf 變數選擇}
+            \index{變數選擇}\marginpar{變數選擇}，一般的做法是嘗試各種變
+            數選擇，並從中選出最佳模組，在輸入變數很多的時候，有三個方法協助
+            選擇:
+          \begin{enumerate}
+            \item {\bf 向前選擇}\index{向前選擇}\marginpar{向前選擇}
+              ，從{\bf 空模組}\index{空模組}\marginpar{空模組}(只有截
+              距沒有輸入變數的模組)開始，先做出$p$個不同變數的簡單線性迴歸
+              模型，從中選出最低$RSS$的模組加入空模組，從剩下的模組中選一
+              個加入後的$RSS$最低的模組，重複直到中止條件
+            \item {\bf 向後選擇}\index{向後選擇}\marginpar{向後選擇}
+              ，先建立包含所有輸入的多重線性迴歸模組，移除擁有最大$p$值的
+              輸入(因為它與結果的關聯最差)，重新計算模組後再移除一個，直到
+              中止條件
+            \item {\bf 混合選擇}\index{混合選擇}\marginpar{混合選擇}
+              ，先使用向前選擇法建立模型，如果途中有輸入的$p$值超過一定程
+              度，就把此輸入移除，重複直到模組的所有變數$p$值都比較小，而
+              且加入任意輸入會有超標$p$值
+          \end{enumerate}
+        \item {\bf 模組對資料的擬合度如何?} \\
+          最常見的二種模型擬和度測量數為$RSE$和$R ^ 2$，當輸入變數增加
+            時，就算其與輸出的關係不大，$R ^ 2$總是會增加，通用$RSE$的定義
+            是:
+          \begin{equation}
+            RSE = \sqrt{\frac{1}{n - p - 1}RSS}
+          \end{equation}
+        \item {\bf 給定一些輸入變數，我們應該預測什麼輸出?預測結果多精準?} \\
+          除了前述的信心區間可用於預測結果，{\bf 預測區間}\index{預測區間}
+            \marginpar{預測區間}也可，它比信心區間長，預測區間是針對特定條
+            件，信心區間則是取平均
+      \end{enumerate}
+  \section{迴歸模型的其他考量因素}
+    \subsection{定性預測因子}
+      雖然多數輸入是數值，但還是有些許輸入不是，例如性別、國籍...
+      \subsubsection{只有二種可能性的定性預測因子}
+        如果要針對性別做研究，可以先把它轉成{\bf 虛擬變量}\index{虛擬變量}
+          \marginpar{虛擬變量}，創建一個新變數來代表:
+        \begin{equation}
+          x_i =
+          \left\{
+            \begin{array}{ll}
+              1 & \mbox{如果第$i$人是女性} \\
+              0 & \mbox{如果第$i$人是男性}
+            \end{array}
+          \right.
+        \end{equation}
+        然後將此變數當成預測因子帶入迴歸模型:
+        \begin{equation}
+          y_i = \beta_0 + \beta_1 x_i + \epsilon_i =
+          \left\{
+            \begin{array}{ll}
+              \beta_0 + \beta_1 + \epsilon_i & \mbox{如果第$i$人是女性}
+                \\
+              \beta_0 + \epsilon_i           & \mbox{如果第$i$人是男性}
+            \end{array}
+          \right.
+        \end{equation}
+        選擇的虛擬變量不同，得到的係數解釋方法，根據代入的迴歸式也不同
+      \subsubsection{超過二種可能性的定性預測因子}
+        在這種情況下，要建造更多虛擬變量:
+        \begin{equation}
+          x_{i1}=
+          \left\{
+            \begin{array}{ll}
+              1 & \mbox{如果第$i$人是亞洲人} \\
+          	  0 & \mbox{如果第$i$人不是亞洲人}
+            \end{array}
+          \right.
+        \end{equation}
+        以及第二個:
+        \begin{equation}
+          x_{i2} =
+          \left\{
+            \begin{array}{ll}
+              1 & \mbox{如果第$i$人是高加索人} \\
+              0 & \mbox{如果第$i$人不是高加索人}
+            \end{array}
+          \right.
+        \end{equation}
+        再把這些變數加入迴歸式以獲得模組:
+        \begin{equation}
+          y_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} +
+            \epsilon_i =
+          \left\{
+            \begin{array}{ll}
+              \beta_0 + \beta_1 + \epsilon_i & \mbox{如果第$i$人是亞洲%
+                                                 人}\\
+              \beta_0 + \beta_2 + \epsilon_i & \mbox{如果第$i$人是高加%
+                                                 索人}\\
+              \beta_0 + \epsilon_i           & \mbox{如果第$i$人是非裔%
+                                                 美國人}
+      	    \end{array}
+          \right.
+   	    \end{equation}
+    \subsection{線性模組延伸}
+      線性模組建立在兩個假設上:{\bf 獨立性}\index{獨立性}\marginpar{獨立性}
+        與{\bf 線性}\index{線性}\marginpar{線性}，前者假設變動其中一個輸入
+        不會影響到其他輸入，而後者假設無論變數值多少，每次往上加一單位的特定變數
+        對結果的影響量始終相同
+      \subsubsection{移除獨立性假設}
+        其中一個做法是增加互動型:
+        \begin{equation}
+          Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2
+            + \epsilon
+        \end{equation}
+        {\bf 等級原則}\index{等級原則}\marginpar{等級原則}聲稱如果要增加一
+          互動型至模組，就算那兩個變數的$p$值偏高，還是要加入\\
+        如果互動型的其中一項是定性預測因子:
+        \begin{equation}
+          balance_i \approx \beta_0 + \beta_1 \times income_i +
+          \left\{
+            \begin{array}{ll}
+              \beta_2 + \beta_3 \times income_i & \mbox{如果第$i$人是%
+                                                    學生} \\
+              0                                 & \mbox{如果第$i$人不%
+                                                    是學生}
+            \end{array}
+          \right.
+        \end{equation}
+      \subsubsection{非線性關係}
+        這種情況使用{\bf 多項式迴歸}\index{多項式迴歸}\marginpar{多項式迴
+          歸}，例如二次:
+        \begin{equation}
+          mpg = \beta_0 + \beta_1 \times horsepower + \beta_2 \times
+            horsepower ^ 2 + \epsilon
+        \end{equation}
+        雖然是多項式，但這種回歸還是一種線性模組，因為多出的次方項可以當成新變數
+          使用
+    \subsection{潛在問題}
+      對一資料使用線性模組擬和可能會發生許多問題，以下這些最常見:
+    \begin{enumerate}
+      \item {\bf 非線性的因果關係} \\
+        {\bf 殘差圖}\index{殘差圖}\marginpar{殘差圖}適合用來偵測這個問
+          題，如果是簡單線性迴歸，畫出$e_i = y_i - \hat{y}_i$和$x_i$的對
+          應關係，如果是多重線性迴歸則改為$e_i$和$\hat{y}_i$，如果圖形能看
+          出某種規則那就表示此線性模組的某個觀點有問題，嘗試新增$\log{X}$
+          、$\sqrt{X}$或$X^2$等來調整
+      \item {\bf 誤差項的相關係數} \\
+        一個線性迴歸模組的重要假設是誤差項彼此之間沒有關係，如果有，估計標準誤
+          差通常會低於真正的標準誤差，進而導致信心和預測區間比真實情況來的
+          短，$p$值也會被低估
+      \item {\bf 誤差項的非常數變異數} \\
+        例如，如果輸出越高誤差項變異數就越高，其中一個可能的解決方法是把輸出結
+          果用凹函數變形，像是$\log{Y}$或$\sqrt{Y}$，如果第$i$項輸出對應
+          到平均$n_i$個原始觀察，且這些原始觀察的變異數為$\sigma ^ 2$，彼
+          此不相關，那他們的平均變異為$\sigma_i ^ 2 = \sigma ^ 2 /
+          n_i$，在這情形下使用{\bf 加權最小平方法}\index{加權最小平方
+          法}\marginpar{加權最小平方法}，在這例子加權數$w_i = n_i$
+      \item {\bf 離群值} \\
+        {\bf 離群值}\index{離群值}\marginpar{離群值}是指某個點$y_i$離模
+          組的預測值太遠，可能是數據收集過程中觀察記錄不正確，離群值可能導致
+          $RSE$過高，進而導致信心區間和$p$值失真，$R ^ 2$也會受影響，殘差圖
+          可用來辨識離群點，但辨識離群點需要一個標準，為此可以改用{\bf 學生化
+          殘差}\index{學生化殘差}\marginpar{學生化殘差}來處理，將每個殘差
+          $e_i$除以其估計標準誤差即可得到，此時通常絕對值大於$3$的資料就是離
+          群點，可以選擇移除離群點，但有時離群點可以代表模型的不足之處
+      \item {\bf 高槓桿點} \\
+        {\bf 高槓桿點}\index{高槓桿點}\marginpar{高槓桿點}是針對不正常的
+          資料$x_i$，對於最小平方線的影響比離群值高，計算{\bf 槓桿統計值}
+          \index{槓桿統計值}\marginpar{槓桿統計值}可以協助篩選，以簡單線性
+          迴歸為例:
+        \begin{equation}
+          h_i = \frac{1}{n} + \frac{(x_i - \bar{x}) ^ 2}{\sum_{j =
+            1} ^ {n}(x_j - \bar{x}) ^ 2}
+        \end{equation}
+        針對多變數的槓桿統計值也有公式可以計算，這值總是介於$1 / n$和$1$之
+          間，而所有觀察資料的平均槓桿值一定是$(p + 1) / n$，若有資料槓桿統
+          計值大幅超過此值，則可以懷疑其為高槓桿點
+      \item 共線性
+        {\bf 共線性}\index{共線性}\marginpar{共線性}代表至少有二個變數有
+          很高的相關性，難以從共線性分離出個別變數對輸出的影響程度，由於共線性
+          會降低迴歸係數的估計準確度，估計係數標準差會上升，降低t統計量，進而
+          降低成功偵測到非零係數的機率，查看相關矩陣是發現共線性的一個簡單方
+          法，有時候共線性發生在三或更多變數，但兩兩之間沒有共線性，稱之為
+          {\bf 多重共線性}\index{多重共線性}\marginpar{多重共線性}，對這
+          個比較好的辨識方法是{\bf 方差膨脹因子(VIF)}\index{方差膨脹因子
+          (VIF)}\marginpar{方差膨脹因子(VIF)}，最小值是$1$，也就絕對沒有
+          共線性，超過$5$或$10$表示可能會導致問題的共線性:
+        \begin{equation}
+          VIF(\hat{\beta}_j) = \frac{1}{1 - R_{X_j | X_-j} ^ 2}
+        \end{equation}
+        其中$R_{X_j | X_-j} ^ 2$是使用$X_j$以外的所有變數，針對$X_j$進行
+          迴歸所得到的$R ^ 2$，$R_{X_j | X_-j} ^ 2$越接近$1$，共線性越明
+          顯，共線性有二個處理方法，一是移除其中一個共線性的變數，二是把這些變
+          數集合成單一變數，例如將它們標準化後取平均
+    \end{enumerate}
+    \subsection{範例:市場分析}
+      \begin{enumerate}
+      	\item 廣告與銷售有幫助嗎? \\
+          將{\color{red}電視}、{\color{red}廣播}和{\color{red}報紙}作
+            為輸入，針對{\color{blue}銷售}進行多重線性迴歸模型分析，並檢驗
+            零假設$H_0$，在本例裡對應到$F$統計值的$p$值非常小，顯示廣告和銷
+            售有關係
+	    \item 關係有多強? \\
+          兩種方法估計，$RSE$估計總體迴歸線輸出的標準差(本例為$1681$單位，
+            輸出平均為$14022$，得到誤差百分率約為$12\%$)；$R ^ 2$統計數紀
+            錄預測變量解釋的輸出變異百分比(本例為$90\%$)
+        \item 哪些媒體對銷售有貢獻? \\
+          對每個預測變量的$t$統計值檢驗$p$值，夠低的$p$值對應的預測便量和輸
+            出有關係(本例中為電視和廣播)
+      	\item 每種媒介對銷售的影響有多大? \\
+          使用$\hat{\beta}_j$的標準誤差可以建立$\beta_j$的信心區間(本例中
+            電視和廣播的$95\%$信心區間比較窄而且不接近零，證明了這些媒體與銷
+            售有關；但報紙的信心區間包含零，統計上比較不重要)，共線性會造成非
+            常寬的標準誤差(本例中，報紙的信心區間是受共線性影響的嗎?三個輸入
+            變數的$VIF$都只比$1$大一點點，所以無法證明這個假設是對的)，為了
+            評估個別變數對輸出的關係，對他們使用簡單線性迴歸
+      	\item 預測未來銷售有多準確? \\
+          將資料代入得到的多重現行回歸模組就能預測，如果要得到單項輸出則使用預
+          測區間；如果要得到長期平均的預測結果則使用信心區間。
+      	\item 關係是線性的嗎? \\
+          可使用殘差圖來辨識非線性，如果是線性，那殘差圖的理想值應該接近常數函
+          數
+        \item {\it Is there synergy among the advertising media?}
+          \\
+          A small p-value associated with the interaction term
+            indicates the presence of non-additive relationships.
+      \end{enumerate}
+
+\printindex %印出索引
+%\addcontentsline{toc}{part}{訓練組資料}
+\begin{thebibliography}{9} %參考資料
+  \bibitem{001Tr}
+    An introduction to statistical learning \emph{with Applications in R} \\
+    Gareth Jams, \\
+    Daniela Witten, \\
+    Trevor Hastie, \\
+    Robert Tibshirani
+
+  \bibitem{100}
+    TOP 100 R TUTORIALS : STEP BY STEP GUIDE \\
+    https://www.listendata.com/p/r-programming-tutorials.html
+
+\end{thebibliography}
+
+%\end{CJK*}%第一版中文使用
+\end{document} 
